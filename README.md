@@ -28,7 +28,7 @@ mozilla repo I want.
 
 In `~/.bash_aliases` I have:
 
-  alias mozdevenv='. ~/bin/mozdevenv'
+    alias mozdevenv='. ~/bin/mozdevenv'
 
 # Test pages
 
