@@ -1,0 +1,247 @@
+#!/usr/bin/php
+<?php
+/*
+ * © 2010, 2011 ROBO Design
+ * http://www.robodesign.ro
+ *
+ * $Date: 2011-08-03 15:50:36 $
+ */
+
+// This checks work log accuracy. The work log file format is a LaTeX file. No 
+// example is provided. Parsing correctness is not relevant. This is just a 
+// quick ugly hack to make things work as I need.
+
+$dates = array();
+$table_total_hours = 0;
+$rate = 0;
+$total_hours = 0;
+$day2day_total_hours = 0;
+$amount = 0;
+$date = 0;
+$day_hours = 0;
+
+$table_header = '\textbf{Day} & \textbf{Hours of work}';
+$total_hours_header = 'Total time worked in';
+$rate_header = 'Hourly rate:';
+$total_amount_header = 'Total amount due:';
+$details_header = '\section*{Details}';
+$day_total_hours_header = '\daytotal';
+
+$table_date_match = '~^\s*(\d{4})/(\d{2})/(\d{2})\s+&\s+(\d+\.?\d*)[^a-z]+$~i';
+$total_hours_match = '~^.+:\s+\\\textbf\{(\d+\.?\d*)\s+[a-z]+\}\.?\s*$~i';
+$rate_match = '~^.+:\s+\\\textbf\{(\d+\.?\d*)\s+[a-z]+\}\.?\s*$~i';
+$total_amount_match = '~^.+:\s+\\\textbf\{(\d+\.?\d*)\s+[a-z]+\}.?\s*$~i';
+$day_hours_interval_match = '~^(\d{2}:\d{2} - \d{2}:\d{2})(, \d{2}:\d{2} - \d{2}:\d{2})*:$~';
+$day_total_hours_match = '~^.+\{(\d+\.?\d*)\}\s*$~';
+$details_date_match = '~^\s*\\\subsection\*\{([a-z]+),\s+(\d+)\s+([a-z]+)\s+(\d+):?\}\s*$~i';
+
+$step = '';
+
+$ln = 0;
+while(!feof(STDIN)) {
+  $line = fgets(STDIN, 4096);
+  $ln++;
+
+  // table start
+  if (empty($step) && strpos($line, $table_header) !== false) {
+    $step = 'table';
+    continue;
+
+  } else if ($step == 'table' && strpos($line, $total_hours_header) !== false) {
+    // table total hours
+
+    $matches = array();
+    if (preg_match($total_hours_match, $line, $matches)) {
+      $total_hours = $matches[1];
+      if ($total_hours != $table_total_hours) {
+        die("table total hours $total_hours != $table_total_hours calculated hours\n");
+      }
+    } else {
+      die("total hours header found, but failed preg_match\n");
+    }
+    continue;
+
+  } else if ($step == 'table' && strpos($line, $rate_header) !== false) {
+    // hourly rate
+
+    $matches = array();
+    if (preg_match($rate_match, $line, $matches)) {
+      $rate = $matches[1];
+      if (!$rate) {
+        die("failed to preg_match rate_match\n");
+      }
+    } else {
+      die("rate header found, but failed preg_match\n");
+    }
+    continue;
+
+  } else if ($step == 'table' && strpos($line, $total_amount_header) !== false) {
+    // total amount header
+
+    $matches = array();
+    if (preg_match($total_amount_match, $line, $matches)) {
+      $amount = $matches[1];
+      if (!$amount) {
+        die("failed to preg_match amount\n");
+      }
+    } else {
+      die("amount header found, but failed preg_match\n");
+    }
+    continue;
+
+  } else if ($step == 'table' && strpos($line, $details_header) !== false) {
+    // details header
+
+    $table_amount = $total_hours * $rate;
+    if ($table_amount != $amount) {
+      die("total amount $amount != $table_amount calculated amount\n");
+    }
+
+    $step = 'details';
+    continue;
+
+  } else if ($step == 'day' && strpos($line, $day_total_hours_header) !== false) {
+    // day total hours header
+
+    if (!$date) {
+      die("[$ln] step $step: found day total, but no date.\n");
+    }
+    if (!isset($dates[$date]['detail_hours'])) {
+      die("[$ln] step $step: found day total for $date, but no date hours interval.\n");
+    }
+
+    $matches = array();
+    $line = str_replace(
+      array('\daytotalhalf', '\daytotalone'),
+      array('\daytotal{0.5}', '\daytotal{1}'),
+      $line);
+    if (preg_match($day_total_hours_match, $line, $matches)) {
+      $h = $matches[1];
+      if ($h != $dates[$date]['detail_hours']) {
+        die("[$ln] day $date total hours $h != {$dates[$date]['detail_hours']} calculated total\n");
+      }
+    } else {
+      die("[$ln] day total hours header found, but failed preg_match\n");
+    }
+
+    if ($dates[$date]['detail_hours'] != $dates[$date]['table_hours']) {
+      die("[$ln] day $date detail hours {$dates[$date]['detail_hours']} != {$dates[$date]['table_hours']} table hours\n");
+    }
+
+    $day2day_total_hours += $h;
+    $date = 0;
+    $step = 'details';
+    continue;
+  }
+
+  $matches = array();
+  if ($step == 'table' && preg_match($table_date_match, $line, $matches)) {
+    // table date
+
+    $date = $matches[1] . '-' . $matches[2] . '-' . $matches[3];
+    if (isset($dates[$date])) {
+      die("$date is defined twice in table\n");
+    }
+
+    $dates[$date] = array(
+      'table_hours' => $matches[4]
+    );
+
+    $table_total_hours += $matches[4];
+    $date = 0;
+    $day_hours = 0;
+    continue;
+
+  } else if ($step == 'details' && preg_match($details_date_match, $line, $matches)) {
+    // details day header
+
+    $date = date('Y-m-d', strtotime($matches[2] . ' ' . $matches[3] . ' ' . $matches[4]));
+    if (!isset($dates[$date])) {
+      die("[$ln] found details for $date but not in summary table\n");
+    }
+
+    $step = 'day';
+    $day_hours = 0;
+    continue;
+
+  } else if ($step == 'day' && preg_match($day_hours_interval_match, $line, $matches)) {
+    // day hours interval
+
+    if (!$date) {
+      die("[$ln] step $step and matched hours interval, but no date!\n");
+    }
+
+    $intervals = explode(',', trim($line, ",\r\n \t:"));
+    $day_hours = 0;
+
+    foreach($intervals as $interval) {
+      $interval = explode('-', $interval);
+
+      $a = explode(':', $interval[0]);
+      $a[0] = trim(ltrim($a[0], '0'));
+      if (!$a[0]) {
+        $a[0] = 0;
+      }
+      $a[1] = trim(ltrim($a[1], '0'));
+      if (!$a[1]) {
+        $a[1] = 0;
+      }
+
+      $b = explode(':', $interval[1]);
+      $b[0] = trim(ltrim($b[0], '0'));
+      if (!$b[0]) {
+        $b[0] = 0;
+      }
+      $b[1] = trim(ltrim($b[1], '0'));
+      if (!$b[1]) {
+        $b[1] = 0;
+      }
+
+      if ($b[0] < $a[0] && $b[0] < 5) {
+        $b[0] += 24;
+      }
+
+      $a_minutes = $a[0] * 60;
+      $b_minutes = $b[0] * 60;
+      $minutes = ($b_minutes + $b[1]) - ($a_minutes + $a[1]);
+      if ($minutes < 0) {
+        die("[$ln] failed to parse interval for day $date\n");
+      }
+      $day_hours += $minutes / 60;
+    }
+
+    if (!$day_hours) {
+      die("hour interval total = 0 for $date\n");
+    }
+
+    if (!isset($dates[$date])) {
+      die("[$ln] found hour intervals for $date but not in summary table\n");
+    } else if (isset($dates[$date]['detail_hours'])) {
+      die("[$ln] found hour intervals for $date twice!\n");
+    }
+
+    $dates[$date]['detail_hours'] = $day_hours;
+    continue;
+  }
+}
+
+if ($step != 'details') {
+  die("file ended prematurely in step $step\n");
+}
+
+if (!count($dates)) {
+  die("no dates found!\n");
+}
+
+foreach ($dates as $date => $date_info) {
+  if (!isset($date_info['detail_hours'])) {
+    die("no details for $date found\n");
+  }
+}
+
+if ($day2day_total_hours != $table_total_hours) {
+  die("details total hours $day2day_total_hours != $table_total_hours table summary total hours.\n");
+}
+
+echo "work log is correct!\n";
+

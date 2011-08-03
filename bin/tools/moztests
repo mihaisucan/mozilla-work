@@ -1,0 +1,134 @@
+#!/bin/bash
+
+# $Author: Mihai Sucan <mihai.sucan@gmail.com>$
+# $Date: 2011-08-03 15:48:51 $
+
+# Quickly run tests from various locations in the mozilla codebase.
+
+MY_PWD="$PWD"
+MY_SELF="${0##*/}"
+
+if [[ "$1" == "-dbg" ]]
+then
+  OBJ_DIR="ff-dbg-obj"
+  TEST_DIR="$2"
+  TEST_FILE="$3"
+else
+  OBJ_DIR="ff-obj"
+  TEST_DIR="$1"
+  TEST_FILE="$2"
+fi
+
+if [[ ! -d "$OBJ_DIR" ]]
+then
+  echo "folder not found: $OBJ_DIR"
+  exit 1
+fi
+
+# default make target
+MAKE_TARGET="mochitest-browser-chrome"
+
+case "$TEST_DIR" in
+  ( '-bbase' )
+    TEST_DIR="browser/base/content/test"
+    MAKE_TARGET="mochitest-browser-chrome"
+    ;;
+  ( '-tabview' )
+    TEST_DIR="browser/base/content/test/tabview"
+    MAKE_TARGET="mochitest-browser-chrome"
+    ;;
+  ( '-hud' )
+    TEST_DIR="browser/devtools/webconsole/test/browser"
+    MAKE_TARGET="mochitest-browser-chrome"
+    ;;
+  ( '-prompts' )
+    TEST_DIR="toolkit/components/prompts/test"
+    MAKE_TARGET="mochitest-plain"
+    ;;
+  ( '-inspector' )
+    TEST_DIR="browser/base/content/test/inspector"
+    MAKE_TARGET="mochitest-browser-chrome"
+    ;;
+  ( '-styleinspector' )
+    TEST_DIR="browser/base/content/test/styleinspector"
+    MAKE_TARGET="mochitest-browser-chrome"
+    ;;
+  ( '-sp-old' )
+    TEST_DIR="browser/base/content/test"
+    MAKE_TARGET="mochitest-browser-chrome"
+    FILE_FILTER="browser_scratchpad_*.js"
+    ;;
+  ( '-sp' )
+    TEST_DIR="browser/devtools/scratchpad/test/browser"
+    MAKE_TARGET="mochitest-browser-chrome"
+    ;;
+  ( '-dom-browser' )
+    TEST_DIR="dom/tests/browser"
+    MAKE_TARGET="mochitest-browser-chrome"
+    ;;
+  ( '-dom-mochitest-general' )
+    TEST_DIR="dom/tests/mochitest/general"
+    MAKE_TARGET="mochitest-plain"
+    ;;
+  ( '-consoleapi' )
+    moztests -dom-browser
+    moztests -dom-mochitest-general
+    exit 0;
+    ;;
+  ( '-srced' )
+    TEST_DIR="browser/base/content/test"
+    MAKE_TARGET="mochitest-browser-chrome"
+    FILE_FILTER="browser_sourceeditor_*.js"
+    ;;
+esac
+
+
+if [[ ! -z "$TEST_FILE" ]]
+then
+  if [[ -f  "${TEST_DIR}/${TEST_FILE}" ]]
+  then
+    TEST_DIR="${TEST_DIR}/${TEST_FILE}"
+  else
+    FILE_FILTER="$TEST_FILE"
+  fi
+fi
+
+if [[ ! -d "$TEST_DIR" && ! -f "$TEST_DIR" ]]
+then
+  echo "folder/file not found: $TEST_DIR"
+  exit 1
+fi
+
+if [[ -d "$TEST_DIR" && ! -z "$FILE_FILTER" ]]
+then
+  cd "$TEST_DIR"
+
+  FILES=($FILE_FILTER)
+
+  cd "$MY_PWD"
+
+  found=0
+  for t in "${FILES[@]}"
+  do
+    if [[ ! -f "${TEST_DIR}/$t" || "$t" =~ ^\. || "$t" =~ ~$ || "$t" =~ \.bak$ ]]
+    then
+      continue
+    fi
+
+    found=1
+    export TEST_PATH="${TEST_DIR}/$t"
+    make -C "$OBJ_DIR" "$MAKE_TARGET"
+  done
+
+  if [[ "$found" -eq 0 ]]
+  then
+    echo "no files match $FILE_FILTER in $TEST_DIR"
+    exit 1
+  fi
+
+  exit 0
+else
+  export TEST_PATH="$TEST_DIR"
+  make -C "$OBJ_DIR" "$MAKE_TARGET"
+  exit $?
+fi

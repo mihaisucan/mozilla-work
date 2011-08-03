@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# This script sets up my shell environment for use with the Mozilla Addon SDK.
+
+MY_PWD="$PWD"
+
+cd ~/src/mozilla-addon-sdk
+. bin/activate
+
+alias cfx="cfx -b ${HOME}/src/mozilla-mihai-devtools-work/ff-obj/dist/bin/firefox"
+
+cd "$MY_PWD"
+

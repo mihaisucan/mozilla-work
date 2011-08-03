@@ -1,0 +1,48 @@
+#!/bin/bash
+
+# This script allows me to start the mozilla build from my cloned repo.
+
+gdb=n
+dbg=n
+
+for i do
+  case $i in
+    ('-gdb')
+      gdb=y
+      ;;
+    ('-dbg')
+      dbg=y
+      ;;
+  esac
+done
+
+if [[ "$dbg" == "y" ]]
+then
+  ffdir="ff-dbg-obj/dist/bin"
+else
+  ffdir="ff-obj/dist/bin"
+fi
+
+if [[ ! -d "$ffdir" ]]
+then
+  echo "folder not found: $ffdir"
+  exit 1
+fi
+
+cd "$ffdir"
+
+if [[ ! -f "firefox" || ! -x "firefox" ]]
+then
+  echo "file not found or file not executable: firefox"
+  exit 1
+fi
+
+cmd="./firefox -no-remote"
+
+if [[ "$gdb" == "y" ]]
+then
+  cmd="$cmd -g"
+fi
+
+$cmd -P mozilla-central
+

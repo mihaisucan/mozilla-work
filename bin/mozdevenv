@@ -1,0 +1,6 @@
+#!/bin/bash
+
+export PATH="${HOME}/bin/mozilla-tools:${PATH}"
+
+alias mozaddons=". ~/bin/mozilla-tools/mozaddons"
+
