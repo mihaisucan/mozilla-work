@@ -124,10 +124,13 @@
           }, false);
 
           iframe2.src = 'data:text/html,nested iframe';
+          iframe2.setAttribute("style", iframe.getAttribute("style"));
           iframe.contentDocument.body.appendChild(iframe2);
         }, false);
 
         iframe.src = 'data:text/html,little iframe';
+        iframe.setAttribute("style",
+            "padding: 10px; border: 5px solid red; width: 350px; height: 250px");
 
         var placeholder = document.getElementById("iframesplaceholder");
         placeholder.appendChild(iframe);
