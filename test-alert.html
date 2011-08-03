@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script>
+      /*window.addEventListener("beforeunload", function(ev) {
+        ev.returnValue = 'lolz';
+      }, false);*/
+      //setInterval(function() { alert("timer"); }, 20000);
+    </script>
+  </head>
+  <body onbeforeunload="alert('onbeforeunload');return 1" 
+    onunload="alert('onunload')" onpagehide="alert('onpagehide')">
+    <p>muahahaha!</p>
+    <iframe src="http://www.robodesign.ro/coding/test-alert.html"></iframe>
+  </body>
+</html>

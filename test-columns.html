@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style type="text/css">
+      html, body { height: 100% }
+      body { margin: 0 }
+      #container {
+        position: relative;
+        width: 80%;
+        top: 30px;
+        left: 30px;
+        border: 2px solid red;
+        background: #eee;
+        height: 80%;
+      }
+      #article {
+        position: absolute;
+        right: 0;
+        height: -moz-calc(100% - 10px);
+        -moz-column-width: 200px;
+        -moz-column-gap: 10px;
+        padding: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container">
+      <div id="article">
+
+<p>#article width is only one column. Alignment does not take into consideration the rest of columns.</p>
+<p>I have to calculate the number of columns to fix the issue, if I put -moz-column-count: N where N is equal to the actual number of columns, then #article is positioned as expected.</p>
+
+<p>
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc nec turpis mi, et condimentum turpis. Vestibulum ut felis neque. Donec vel tellus mauris. Donec iaculis, ligula vel iaculis porttitor, eros orci elementum tortor, id imperdiet libero mauris id urna. Nam posuere turpis quis orci scelerisque egestas. Phasellus tincidunt odio nec arcu pharetra pellentesque. Vivamus ornare magna id neque luctus at fringilla turpis bibendum. Etiam in nulla turpis. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce ut venenatis libero. Duis placerat congue lacinia. Integer lectus odio, viverra ac venenatis vitae, semper non sapien. Nullam eget faucibus sem. Cras at tortor sem. Sed vitae ipsum at nibh elementum ultricies.
+</p>
+<p>
+Aenean posuere tellus id ipsum blandit id luctus risus vehicula. Aliquam rutrum, felis eget gravida pulvinar, tellus sapien ultricies augue, feugiat cursus massa dui eu quam. Pellentesque ullamcorper sollicitudin sapien eget hendrerit. Suspendisse at eros in nunc vulputate ultrices nec nec mauris. Ut volutpat vestibulum leo eu suscipit. Nulla facilisi. Integer eget ligula justo. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Fusce non varius lacus. Fusce eu erat nulla, in vehicula justo. Vestibulum id risus non magna eleifend lobortis. Praesent iaculis odio ante, quis porttitor elit. Sed sed ligula vel sem consequat aliquet.
+</p>
+<p>
+Duis et quam massa. Sed sed elit vitae ante venenatis ultrices. Nam faucibus posuere dolor ac malesuada. Vestibulum cursus aliquet sem vel lobortis. Fusce sit amet consectetur nisl. Quisque adipiscing tempus risus, consectetur iaculis urna hendrerit in. Pellentesque a sapien varius lacus interdum vehicula. Aliquam erat volutpat. Aliquam sollicitudin, metus vitae venenatis vulputate, justo metus interdum sem, quis cursus erat mi sit amet velit. Praesent metus ligula, tristique eget egestas et, placerat eu mauris.
+</p>
+<p>
+Donec fermentum posuere dui, a ultricies diam porttitor ut. Nunc nec mauris lectus. Aliquam erat volutpat. Morbi dapibus purus ac eros euismod fringilla. Curabitur gravida enim in mauris lacinia sit amet ornare ante ultricies. Nunc elementum pulvinar ligula vel fringilla. Morbi aliquet facilisis velit, id lacinia eros euismod nec. In feugiat lectus sed tellus elementum feugiat. Integer nibh tortor, cursus eu mattis eleifend, pellentesque a ante. Pellentesque commodo libero semper ipsum interdum quis pharetra turpis sollicitudin. Integer egestas volutpat scelerisque. Nam ut neque lectus. Sed tempor, tortor eu blandit molestie, ligula odio consectetur massa, in facilisis ipsum augue ultricies felis. Integer sagittis commodo ipsum, et ornare risus vehicula id. Quisque varius feugiat nulla, vel porta neque sodales sit amet. Vivamus a nisi ut elit pretium egestas.
+</p>
+<p>
+Donec fringilla neque eget metus auctor dignissim. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque vitae metus id nulla ultrices sagittis. Pellentesque elit nisl, varius in condimentum non, consequat eu enim. Pellentesque dictum velit non libero sodales sit amet vestibulum nulla rutrum. Ut vulputate mi vel arcu porta et auctor dolor hendrerit. Suspendisse quis libero ac eros sagittis dignissim sit amet vitae lacus. Maecenas eget dui tortor. Proin in enim odio. Phasellus condimentum adipiscing sollicitudin. Donec vel arcu sagittis ante facilisis viverra. Nam laoreet interdum convallis. Donec dignissim porta mi a vulputate. Vivamus commodo ultrices ipsum, id convallis orci rutrum sed. Donec sagittis lectus ut purus placerat aliquam. Curabitur ante arcu, accumsan pretium fermentum at, blandit vitae leo.
+</p>
+<p>
+Sed et est dolor, ac consectetur purus. Morbi at tortor ligula. Morbi vitae mauris ac metus interdum ultricies quis sed libero. Nam molestie lacus vitae libero lacinia porta. Curabitur imperdiet venenatis congue. Nunc malesuada elit nisl, nec adipiscing odio. Suspendisse auctor mollis adipiscing. Maecenas pharetra elit interdum ante scelerisque faucibus. Phasellus massa erat, dapibus at fringilla a, varius sed metus. Nulla elementum condimentum nulla, vitae eleifend lacus tincidunt eu. Sed ac magna ut lorem tincidunt dapibus id nec eros. Donec feugiat, sapien eget luctus tincidunt, libero mi facilisis justo, quis lacinia orci justo ultrices elit. Curabitur non tincidunt nisi. Donec vitae orci at magna tristique ullamcorper nec nec turpis. Maecenas eu nunc nec magna commodo facilisis. Sed lacinia aliquam sem, eget scelerisque est mattis vitae.
+</p>
+<p>
+Cras fermentum urna et urna malesuada mattis. Aenean nec metus quis quam porta volutpat non at dui. Aenean auctor dapibus elementum. Fusce bibendum erat ut est accumsan laoreet in et dolor. Sed fringilla rhoncus fringilla. Mauris tincidunt, neque eu cursus elementum, diam diam vehicula dui, dapibus commodo est dui ut enim. Quisque vitae lectus enim. Proin posuere ultrices metus vitae mattis. Maecenas neque sem, sodales id tincidunt sed, auctor sit amet eros. Aliquam semper dignissim purus. Morbi lobortis risus eu lectus porttitor tempor. Cras quis laoreet ligula. Etiam consectetur scelerisque quam nec suscipit. Donec feugiat elementum tellus, at scelerisque mi lobortis sit amet.
+</p>
+<p>
+Nulla eu tellus ac nisl porta elementum et sed nisi. Donec vitae leo in diam aliquet varius. Donec ultricies tristique tellus, non condimentum augue pulvinar ac. Aliquam rutrum sem lorem, tincidunt tincidunt urna. Sed leo turpis, eleifend vel mattis faucibus, tempor vel purus. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec faucibus lectus sit amet justo porta bibendum ut tristique risus. Pellentesque quis lorem quis magna egestas luctus. Nulla facilisi. Donec sit amet consequat magna. Aliquam velit arcu, tincidunt non faucibus a, iaculis sit amet felis. Ut congue, nibh vel tempus ultrices, odio nisl dictum eros, vel blandit risus sem id risus. Integer et lorem lectus, ac volutpat mi. Pellentesque posuere ullamcorper lectus, at condimentum velit cursus sed.
+</p>
+<p>
+Nulla eleifend tellus quis felis luctus sollicitudin. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Etiam eu arcu id sem tincidunt hendrerit in in nisl. Phasellus pretium vehicula tellus, sit amet pulvinar turpis suscipit id. In cursus varius diam eu laoreet. Vivamus ultricies odio nec tortor vulputate in feugiat enim feugiat. Sed ultricies convallis feugiat. Maecenas placerat malesuada tincidunt. Sed bibendum ultrices felis, ac hendrerit nulla tempor eu. Proin porttitor eros vitae lorem rhoncus non viverra tortor imperdiet. Phasellus euismod ultricies faucibus. Etiam ultrices vestibulum nibh, vel tempor leo imperdiet vitae. Cras vestibulum accumsan lorem, quis imperdiet leo gravida at. Suspendisse potenti. Donec commodo ultricies lacus quis lobortis. Mauris fringilla, dolor id cursus aliquam, ligula ligula adipiscing magna, vitae commodo lacus mi et augue. Curabitur fermentum, magna nec lobortis commodo, nibh dolor convallis leo, et tempor justo lacus at ipsum.
+</p>
+<p>
+Fusce lacinia eros pellentesque eros luctus a ultricies diam interdum. Etiam sed sapien sit amet est pulvinar euismod ut sit amet metus. Fusce ante nibh, varius quis dignissim ut, interdum a nibh. Nullam auctor fermentum faucibus. Duis rhoncus quam at ligula dictum et sodales lacus sagittis. Quisque semper, urna eget congue iaculis, erat lorem mollis nunc, eu feugiat diam elit ut lacus. Aenean justo felis, mollis et pharetra et, facilisis quis augue. Sed vulputate, quam vitae sagittis pulvinar, est quam cursus orci, non iaculis massa libero nec risus. Donec magna justo, posuere sit amet blandit et, faucibus ut sapien. Aliquam erat volutpat. Praesent risus magna, mollis sodales ultrices sed, venenatis ac risus. In vitae dolor tellus, id varius risus. Nullam dui orci, ornare et egestas non, faucibus vitae nisl.
+</p>
+      </div>
+    </div>
+  </body>
+</html>

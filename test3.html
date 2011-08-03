@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style type="text/css"><!--
+      .awesomeGreen {
+        color: white;
+        height: 100px;
+        background: blue;
+        font-size: 2em;
+        font-weight: bold;
+      }
+      --></style>
+  </head>
+  <body>
+    <p><button onclick="addAttribute()">add attribute</button> <button 
+      onclick="modifyAttribute()">modify attribute value</button> <button 
+      onclick="deleteAttribute()">remove attribute</button> <button 
+      onclick="modifyTextNode()">modify text node</button> <button 
+      onclick="modifyCommentNode()">modify comment node</button> <button 
+      onclick="addElementNode()">add element node</button> <button 
+      onclick="moveElementNode()">move element node</button> <button 
+      onclick="replaceElementNode()">replace element node</button> <button 
+      onclick="removeElementNode()">remove element node</button> <button 
+      onclick="renameAttributeNode()">rename attribute node</button> <button 
+      onclick="renameElementNode()">rename element node</button> <button 
+      onclick="addIframe()">add iframe</button> <button 
+      onclick="removeIframe()">remove iframe</button> <button 
+      onclick="addImages()">add images</button> <button 
+      onclick="panelRefreshTest()">panel refresh test</button> <button 
+      onclick="generateError()">generate error</button></p>
+
+    <div id="container">
+      <div id="comment"><!-- highly informative comment --></div>
+      <div id="textnode">text node</div>
+      <div id="attrs" class="test" renameme="test!"></div>
+      <div id="elements"></div>
+      <div id="replaceme" class="test">baz baz</div>
+      <div id="moveme">foe</div>
+      <div id="renameme">\o/</div>
+      <div id="frames"></div>
+    </div>
+
+    <p id="panelRefreshTest">Hello world!</p>
+
+    <p><a href="http://example.com">Leave page</a>, <a 
+      href="javascript:location.reload()">reload</a>, or go to <a 
+      href="foobar://bazbaz">some</a> <a href="http://foobar.lan/">broken</a> <a 
+      href="http://example.com/foobar">pages</a>.</p>
+
+    <script type="text/javascript"><!--
+      var count = 0;
+
+      function addAttribute() {
+        var node = document.querySelector("#attrs");
+        node.setAttribute("attr" + (count++), Date.now());
+      }
+
+      function modifyAttribute() {
+        var node = document.querySelector("#attrs");
+        node.className = "class" + Date.now();
+      }
+
+      function deleteAttribute() {
+        var node = document.querySelector("#attrs");
+        var attr = null;
+        for (var i = 0, n = node.attributes.length; i < n; i++) {
+          attr = node.attributes[i];
+          if (attr.nodeName.indexOf("attr") == 0) {
+            node.removeAttribute(attr.nodeName);
+            return;
+          }
+        }
+        alert("No attribute to remove. First add some attributes.");
+      }
+
+      function modifyTextNode() {
+        var node = document.querySelector("#textnode").firstChild;
+        node.nodeValue = "text node " + Date.now();
+      }
+
+      function modifyCommentNode() {
+        var node = document.querySelector("#comment").firstChild;
+        node.nodeValue = "comment " + Date.now();
+      }
+
+      function addElementNode() {
+        var target = document.querySelector("#elements");
+        var elem = document.createElement("p");
+        elem.textContent = "foo element " + (count++);
+        target.appendChild(elem);
+      }
+
+      function moveElementNode() {
+        var node = document.querySelector("#moveme");
+        if (node.parentNode.id == "container") {
+          document.body.appendChild(node);
+        } else {
+          document.querySelector("#container").appendChild(node);
+        }
+      }
+
+      function replaceElementNode() {
+        var oldNode = document.querySelector("#replaceme");
+        var newNode = document.createElement("div");
+        newNode.id = oldNode.id;
+        newNode.className = "foo" + (count++);
+        newNode.textContent = "baz baz " + (count++);
+        document.querySelector("#container").replaceChild(newNode, oldNode);
+      }
+
+      function removeElementNode() {
+        var target = document.querySelector("#elements");
+        if (target.firstElementChild) {
+          target.removeChild(target.firstElementChild);
+        } else {
+          alert("No element to remove. First add some elements.");
+        }
+      }
+
+      function renameAttributeNode() {
+        var node = document.querySelector("#attrs").
+          getAttributeNode("renameme");
+        document.renameNode(node, "", "rename" + (count++));
+      }
+
+      function renameElementNode() {
+        var node = document.querySelector("#renameme");
+        document.renameNode(node, "", "rename" + (count++));
+      }
+
+      function addIframe() {
+        var target = document.querySelector("#frames");
+        var iframe = document.createElement("iframe");
+        iframe.src = window.location + "?" + (count++);
+        target.appendChild(iframe);
+      }
+
+      function removeIframe() {
+        var target = document.querySelector("#frames");
+        if (target.firstChild) {
+          target.removeChild(target.firstChild);
+        }
+      }
+
+      function addImages() {
+        var html = '<img ' +
+  'src="http://www.robodesign.ro/files/gallery/original/the_wind_of_change.jpg"' 
+  + ' width="100" height="100"> ' +
+  '<img ' +
+  'src="http://www.robodesign.ro/files/gallery/original/piano-room-pov1-final.jpg"'
+  + ' width="100" height="100"> ' +
+  '<img ' +
+  'src="http://www.robodesign.ro/files/gallery/original/piano-room-pov2-final.jpg"'
+  + ' width="100" height="100"> ' +
+  '<img ' +
+  'src="http://www.robodesign.ro/files/gallery/original/piano-room-pov3-final.jpg"'
+  + ' width="100" height="100">';
+        var node = document.createElement("div");
+        node.id = "images";
+        node.innerHTML = html;
+        document.body.appendChild(node);
+      }
+
+      function panelRefreshTest() {
+        var node = document.getElementById("panelRefreshTest");
+        if (node.className) {
+          node.className = "";
+        } else {
+          node.className = "awesomeGreen";
+        }
+      }
+
+      if (!window.frameElement) {
+        addIframe();
+      }
+
+      function generateError() {
+        console.log("console log");
+        console.error("console error");
+        foobaz.bar();
+      }
+    // --></script>
+  </body>
+</html>

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html dir="rtl">
+  <head>
+    <style type="text/css">
+      html, body { height: 100% }
+      body { margin: 0 }
+      #article {
+        position: absolute;
+        top: 50px;
+        left: 30px;
+        background: #eee;
+        border: 2px solid red;
+        width: 600px;
+        height: 70%;
+        -moz-column-width: 200px;
+        -moz-column-count: 2;
+        -moz-column-gap: 10px;
+        padding: 10px;
+      }
+      #article:after {
+        content: "hello world!";
+        display: block;
+        background: green;
+        color: #fff;
+        position: absolute;
+        bottom: 10px;
+        right: 0;
+      }
+    </style>
+  </head>
+  <body>
+<p>The "hello world!" string is not positioned where it is expected. If I add 
+ overflow-x: hidden to #article, then :after is not visible.</p>
+
+<div id="article">
+<p>
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc nec turpis mi, et 
+condimentum turpis. Vestibulum ut felis neque. Donec vel tellus mauris. Donec 
+iaculis, ligula vel iaculis porttitor, eros orci elementum tortor, id imperdiet 
+libero mauris id urna. Nam posuere turpis quis orci scelerisque egestas.  
+Phasellus tincidunt odio nec arcu pharetra pellentesque. Vivamus ornare magna id 
+neque luctus at fringilla turpis bibendum. Etiam in nulla turpis. Lorem ipsum 
+dolor sit amet, consectetur adipiscing elit. Fusce ut venenatis libero. Duis 
+placerat congue lacinia. Integer lectus odio, viverra ac venenatis vitae, semper 
+non sapien. Nullam eget faucibus sem. Cras at tortor sem. Sed vitae ipsum at 
+nibh elementum ultricies.
+</p>
+<p>
+Aenean posuere tellus id ipsum blandit id luctus risus vehicula. Aliquam rutrum, 
+felis eget gravida pulvinar, tellus sapien ultricies augue, feugiat cursus massa 
+dui eu quam. Pellentesque ullamcorper sollicitudin sapien eget hendrerit.  
+Suspendisse at eros in nunc vulputate ultrices nec nec mauris. Ut volutpat 
+vestibulum leo eu suscipit. Nulla facilisi. Integer eget ligula justo.  Lorem 
+ipsum dolor sit amet, consectetur adipiscing elit. Cum sociis natoque penatibus 
+et magnis dis parturient montes, nascetur ridiculus mus. Fusce non varius lacus.  
+Fusce eu erat nulla, in vehicula justo. Vestibulum id risus non magna eleifend 
+lobortis. Praesent iaculis odio ante, quis porttitor elit. Sed sed ligula vel 
+sem consequat aliquet.
+</p>
+<p>
+Duis et quam massa. Sed sed elit vitae ante venenatis ultrices. Nam faucibus 
+posuere dolor ac malesuada. Vestibulum cursus aliquet sem vel lobortis. Fusce 
+sit amet consectetur nisl. Quisque adipiscing tempus risus, consectetur iaculis 
+urna hendrerit in. Pellentesque a sapien varius lacus interdum vehicula. Aliquam 
+erat volutpat. Aliquam sollicitudin, metus vitae venenatis vulputate, justo 
+metus interdum sem, quis cursus erat mi sit amet velit. Praesent metus ligula, 
+tristique eget egestas et, placerat eu mauris.
+</p>
+<p>
+Donec fermentum posuere dui, a ultricies diam porttitor ut. Nunc nec mauris 
+lectus. Aliquam erat volutpat. Morbi dapibus purus ac eros euismod fringilla.  
+Curabitur gravida enim in mauris lacinia sit amet ornare ante ultricies. Nunc 
+elementum pulvinar ligula vel fringilla. Morbi aliquet facilisis velit, id 
+lacinia eros euismod nec. In feugiat lectus sed tellus elementum feugiat.  
+Integer nibh tortor, cursus eu mattis eleifend, pellentesque a ante.  
+Pellentesque commodo libero semper ipsum interdum quis pharetra turpis 
+sollicitudin. Integer egestas volutpat scelerisque. Nam ut neque lectus. Sed 
+tempor, tortor eu blandit molestie, ligula odio consectetur massa, in facilisis 
+ipsum augue ultricies felis.
+</p>
+</div>
+  </body>
+</html>

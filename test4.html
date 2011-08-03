@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <p><button>click!</button></p>
+    <script type="text/javascript"><!--
+      (function () {
+        var btn = document.querySelector('button');
+        btn.addEventListener('click', function() {
+          console.log("button clicked");
+        }, false);
+
+        var iframe = document.createElement('iframe');
+        iframe.src = 'data:text/html,little iframe';
+        document.body.appendChild(iframe);
+      })();
+    // --></script>
+  </body>
+</html>

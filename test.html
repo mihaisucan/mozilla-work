@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style type="text/css">
+      @import "test.css";
+
+      .foobar { color: pink; }
+
+      .test, #test { color: green }
+      #test {
+        border: 20px solid blue;
+      }
+      #foobar {
+        background: gray;
+        color: gray;
+        -webkit-bad-property: value;
+        -o-bad-property: value;
+        -ms-bad-property: value;
+        -unknown-property: value;
+        woahaha-property: value;
+        broken: value;
+        background: error;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="test">hello world!</div>
+    <div id="test">hello world!</div>
+    <div id="foobar" style="font-weight:bold;color:white">
+      <p>hello world!</p>
+      <div class="test" style="color:blue;padding:5px;">hello world!</div>
+    </div>
+    <div class="foobar">foobar</div>
+
+    <button>generate error!</button>
+    <button onclick="console.clear()">clear</button>
+    <button onclick="console.group('foo')">group</button>
+    <button onclick="console.groupEnd('foo')">groupEnd</button>
+
+    <script type="text/javascript"><!--
+      //window.console = {};
+      //window.console.error = function() { alert("lol") };
+
+      (function () {
+        bigDeal = "lolz";
+
+        function foobarTraceMe1(a, b) {
+          return foobarTraceMe2(a+1, b+2);
+        }
+
+        function foobarTraceMe2(a, b) {
+          return foobarTraceMe3(a+1, b+2);
+        }
+
+        function foobarTraceMe3(a, b) {
+          console.trace();
+          return a+1 + b+2;
+        }
+
+        var btn = document.getElementsByTagName('button')[0];
+        btn.addEventListener('click', function(ev) {
+          console.time("foo");
+          console.dir(console, window.location);
+          foobarTraceMe1(1, 2);
+          document.body.childNodes[1000];
+          if (ev.preventBubble) {
+            ev.preventBubble();
+          }
+          try {
+            foo.bar.intern();
+          } catch (ex) {
+            window.lastException = ex;
+          }
+          var result = console.timeEnd("foo");
+          console.log("timeEnd result " + result);
+
+          result = console.timeEnd("foo2");
+          console.log("timeEnd2 result " + result);
+
+          console.time();
+          console.timeEnd();
+          foo.bar.intern();
+        }, false);
+
+        var myEventHandler = function (ev) {
+          console.log(ev.type, ev);
+          console.info("info " + ev.type);
+          console.error("error " + ev.type);
+          console.warn("warn " + ev.type);
+        };
+
+        document.body.addEventListener('mousedown', myEventHandler, false);
+        document.body.addEventListener('mouseup', myEventHandler, false);
+        document.body.addEventListener('click', myEventHandler, false);
+        document.body.addEventListener('dragstart', myEventHandler, false);
+        document.body.addEventListener('dragend', myEventHandler, false);
+      })();
+
+      function createIframeDocument()
+      {
+        var iframe = document.createElement('iframe');
+
+        iframe.addEventListener("load", function () {
+          iframe.removeEventListener("load", arguments.callee, false);
+
+          var div = iframe.contentDocument.createElement('div');
+          div.textContent = 'little div';
+          iframe.contentDocument.body.appendChild(div);
+
+          var iframe2 = iframe.contentDocument.createElement('iframe');
+
+          iframe2.addEventListener('load', function () {
+            iframe2.removeEventListener('load', arguments.callee, false);
+
+            var div2 = iframe2.contentDocument.createElement('div');
+            div2.textContent = 'nested div';
+            iframe2.contentDocument.body.appendChild(div2);
+
+            var div3 = iframe2.contentDocument.createElement('div');
+            div3.textContent = 'big div';
+            div3.setAttribute('style', 'height:500px; width:500px; border:1px solid gray;');
+
+            iframe2.contentDocument.body.appendChild(div3);
+          }, false);
+
+          iframe2.src = 'data:text/html,nested iframe';
+          iframe.contentDocument.body.appendChild(iframe2);
+        }, false);
+
+        iframe.src = 'data:text/html,little iframe';
+
+        var placeholder = document.getElementById("iframesplaceholder");
+        placeholder.appendChild(iframe);
+      }
+
+      window.addEventListener('load', createIframeDocument, false);
+
+      (function(){
+      var req = new XMLHttpRequest();
+      req.open('GET', 'http://www.mozilla.org/', true);
+      req.onreadystatechange = function() {
+        if (req.readyState == 4) {
+          console.log("XHR done");
+          xhrException();
+          console.log("XHR - should not execute!");
+        }
+      };
+      req.send(null);
+      })();
+
+      window.foobarObject = {a: 1, b: 2, c: 3};
+
+    // --></script>
+
+<script type="application/javascript;version=1.8">
+(function(){
+function nukeFunc() {
+  var a = 5;
+  while(a < 10)
+    yield a++;
+}
+
+window.nuke = nukeFunc();
+nuke.next();
+
+
+var lang = { name: 'JavaScript', birthYear: 1995, blabla: "cucu" };
+window.nuke2 = Iterator(lang);
+
+function Range(low, high){
+  this.low = low;
+  this.high = high;
+}
+
+function RangeIterator(range){
+  this.range = range;
+  this.current = this.range.low;
+}
+
+RangeIterator.prototype.next = function(){
+  if (this.current > this.range.high)
+    throw StopIteration;
+  else
+    return this.current++;
+};
+
+Range.prototype.__iterator__ = function(){
+  return new RangeIterator(this);
+};
+
+window.nuke3 = new Range(3, 15);
+
+window.nuke4 = (i * 2 for (i in nuke3));
+
+window.myGettersAndSetters = {
+  _cucu: 5,
+  get cucuRigu() { return this._cucu++; },
+  set cucuRigu(val) { this._cucu = val; },
+};
+
+})();
+
+function scrollTest()
+{
+  // just enlarge #bigarea so i have something to scroll.
+  var elem = document.getElementById("bigarea");
+  let height = (window.innerHeight * 2) + "px";
+  if (elem.style.height == height)
+    elem.style.height = "auto";
+  else
+    elem.style.height = height;
+}
+
+</script>
+    <script type="application/javascript;version=1.7" src="test.js"></script>
+    <img src="lolz.png">
+    <div id="iframesplaceholder" style="display:inline"></div>
+    <p><button onclick="scrollTest()">scroll test</button></p>
+    <div style="border: 1px red solid" id="bigarea">big area</div>
+    <p>booo</p>
+  </body>
+</html>

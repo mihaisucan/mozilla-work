@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+  <title>elementFromPoint</title>
+  <body>
+    try to hover the iframe below and see the console log results.
+
+    <script type="text/javascript"><!--
+      window.onload = function() {
+        var iframe = document.createElement('iframe');
+        iframe.src = 'data:text/html,little iframe';
+        document.body.appendChild(iframe);
+      };
+      window.onmousemove = function (ev) {
+        var node = document.elementFromPoint(ev.clientX, ev.clientY);
+        console.log("x " + ev.clientX + " y " + ev.clientY + " node " + node);
+      };
+    // --></script>
+  </body>
+</html>
