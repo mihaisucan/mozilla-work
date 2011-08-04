@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # $Author: Mihai Sucan <mihai.sucan@gmail.com>$
-# $Date: 2011-08-03 15:48:51 $
+# $Date: 2011-08-03 23:37:44 $
 
 # Quickly run tests from various locations in the mozilla codebase.
 
@@ -53,13 +53,8 @@ case "$TEST_DIR" in
     TEST_DIR="browser/base/content/test/styleinspector"
     MAKE_TARGET="mochitest-browser-chrome"
     ;;
-  ( '-sp-old' )
-    TEST_DIR="browser/base/content/test"
-    MAKE_TARGET="mochitest-browser-chrome"
-    FILE_FILTER="browser_scratchpad_*.js"
-    ;;
   ( '-sp' )
-    TEST_DIR="browser/devtools/scratchpad/test/browser"
+    TEST_DIR="browser/devtools/scratchpad/test"
     MAKE_TARGET="mochitest-browser-chrome"
     ;;
   ( '-dom-browser' )
@@ -76,9 +71,8 @@ case "$TEST_DIR" in
     exit 0;
     ;;
   ( '-srced' )
-    TEST_DIR="browser/base/content/test"
+    TEST_DIR="browser/devtools/SourceEditor/test"
     MAKE_TARGET="mochitest-browser-chrome"
-    FILE_FILTER="browser_sourceeditor_*.js"
     ;;
 esac
 
