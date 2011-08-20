@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # $Author: Mihai Sucan <mihai.sucan@gmail.com>$
-# $Date: 2011-08-12 00:03:43 $
+# $URL: http://www.robodesign.ro/mihai $
 
 # Quickly run tests from various locations in the mozilla codebase.
 
@@ -73,6 +73,16 @@ case "$TEST_DIR" in
   ( '-srced' )
     TEST_DIR="browser/devtools/sourceeditor/test"
     MAKE_TARGET="mochitest-browser-chrome"
+    ;;
+  ( '-devtools' )
+    TEST_DIR="browser/devtools"
+    MAKE_TARGET="mochitest-browser-chrome"
+    ;;
+  ( '-devtools-all' )
+    moztests -consoleapi
+    moztests -inspector
+    moztests -devtools
+    exit 0;
     ;;
 esac
 
