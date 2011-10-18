@@ -10,7 +10,7 @@
       #test {
         border: 20px solid blue;
       }
-      #foobar {
+      #foobar, #unmatched {
         background: gray;
         color: gray;
         -webkit-bad-property: value;
@@ -21,7 +21,15 @@
         broken: value;
         background: error;
       }
+      #match { text-decoration: underline }
+      #editable {
+        border: 1px solid blue;
+      }
+      #editable:focus {
+        border: 2px solid red;
+      }
     </style>
+    <link rel=stylesheet href="test-unmatched.css">
   </head>
   <body>
     <div class="test">hello world!</div>
@@ -31,6 +39,7 @@
       <div class="test" style="color:blue;padding:5px;">hello world!</div>
     </div>
     <div class="foobar">foobar</div>
+    <div id="match">lolz<p id="dontmatch">foololz</p></div>
 
     <button>generate error!</button>
     <button onclick="console.clear()">clear</button>
@@ -60,7 +69,7 @@
         var btn = document.getElementsByTagName('button')[0];
         btn.addEventListener('click', function(ev) {
           console.time("foo");
-          console.dir(console, window.location);
+          console.dir(document.styleSheets, console);
           foobarTraceMe1(1, 2);
           document.body.childNodes[1000];
           if (ev.preventBubble) {
@@ -83,17 +92,37 @@
         }, false);
 
         var myEventHandler = function (ev) {
-          console.log(ev.type, ev);
+          var result = console.log("log", ev.type, ev);
+          console.__returnValue__ = 'test';
+          result = console.log("console log result", result);
+
+          /*
+          Object.defineProperty(console, "__returnValue__", {
+            get: function() {
+              return "foo";
+            },
+            enumerable: true,
+            configurable: false
+          });*/
+
+          result = console.log("console log result 2", result);
+
+          console.log("console log result 3", result);
+
           console.info("info " + ev.type);
           console.error("error " + ev.type);
           console.warn("warn " + ev.type);
+          console.error("error omg %s %o %d %i %f %a", "aloha", document.body, 
+              window.innerWidth, window.innerHeight, Math.PI, "zuzu", null, 
+              undefined);
+          console.debug("debug", ev.type, ev);
         };
 
         document.body.addEventListener('mousedown', myEventHandler, false);
-        document.body.addEventListener('mouseup', myEventHandler, false);
-        document.body.addEventListener('click', myEventHandler, false);
-        document.body.addEventListener('dragstart', myEventHandler, false);
-        document.body.addEventListener('dragend', myEventHandler, false);
+        //document.body.addEventListener('mouseup', myEventHandler, false);
+        //document.body.addEventListener('click', myEventHandler, false);
+        //document.body.addEventListener('dragstart', myEventHandler, false);
+        //document.body.addEventListener('dragend', myEventHandler, false);
       })();
 
       function createIframeDocument()
@@ -214,6 +243,16 @@ function scrollTest()
     elem.style.height = height;
 }
 
+function myDoPaste()
+{
+  document.execCommand("paste", false, null);
+}
+
+function myOnPaste(e)
+{
+  console.log("onpaste!");
+}
+
 </script>
     <script type="application/javascript;version=1.7" src="test.js"></script>
     <img src="lolz.png">
@@ -221,5 +260,9 @@ function scrollTest()
     <p><button onclick="scrollTest()">scroll test</button></p>
     <div style="border: 1px red solid" id="bigarea">big area</div>
     <p>booo</p>
+    <div id="editable" contenteditable="" onpaste="myOnPaste(event)">foo bar 
+      editable</div>
+    <textarea>foo</textarea>
+    <p><button onclick="myDoPaste()">paste!</button></p>
   </body>
 </html>

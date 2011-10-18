@@ -1,0 +1,6 @@
+.someUnmatchedClass {
+  color: red;
+  border: 10px solid red;
+  outline: 10px dashed red;
+}
+
