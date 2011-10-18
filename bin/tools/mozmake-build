@@ -6,6 +6,8 @@ MY_SELF="${0##*/}"
 
 #export CC="ccache gcc"
 #export CXX="ccache g++"
+export CC=clang
+export CXX=clang++
 
 if [[ "$1" == "-dbg" ]]
 then

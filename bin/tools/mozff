@@ -9,6 +9,7 @@ for i do
   case $i in
     ('-gdb')
       gdb=y
+      dbg=y
       ;;
     ('-dbg')
       dbg=y
@@ -44,5 +45,5 @@ then
   cmd="$cmd -g"
 fi
 
-$cmd -P mozilla-central
+$cmd -P mozilla-central -purgecaches
 

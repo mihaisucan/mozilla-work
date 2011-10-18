@@ -8,15 +8,56 @@
 MY_PWD="$PWD"
 MY_SELF="${0##*/}"
 
-if [[ "$1" == "-dbg" ]]
+gdb=0
+dbg=0
+
+# ugly arguments parsing
+expected="dir"
+for i do
+  case $i in
+    ('-gdb')
+      gdb=1
+      dbg=1
+      ;;
+    ('-dbg')
+      dbg=1
+      ;;
+    ('-target')
+      expected="target"
+      ;;
+    ('-'*)
+      TEST_SUITE="$i"
+      expected="file"
+      ;;
+    ( * )
+      case $expected in
+        ('dir')
+          CUSTOM_TEST_DIR="$i"
+          expected="file"
+          ;;
+        ('file')
+          CUSTOM_TEST_FILE="$i"
+          expected="nothing"
+          ;;
+        ('target')
+          CUSTOM_MAKE_TARGET="$i"
+          if [[ ! -z "$CUSTOM_TEST_DIR" || ! -z "$TEST_SUITE" ]]
+          then
+            expected="file"
+          else
+            expected="dir"
+          fi
+          ;;
+      esac
+      ;;
+  esac
+done
+
+if [[ $dbg -eq 1 ]]
 then
   OBJ_DIR="ff-dbg-obj"
-  TEST_DIR="$2"
-  TEST_FILE="$3"
 else
   OBJ_DIR="ff-obj"
-  TEST_DIR="$1"
-  TEST_FILE="$2"
 fi
 
 if [[ ! -d "$OBJ_DIR" ]]
@@ -28,16 +69,16 @@ fi
 # default make target
 MAKE_TARGET="mochitest-browser-chrome"
 
-case "$TEST_DIR" in
+case "$TEST_SUITE" in
   ( '-bbase' )
     TEST_DIR="browser/base/content/test"
     MAKE_TARGET="mochitest-browser-chrome"
     ;;
-  ( '-tabview' )
+  ( '-tabview' | '-panorama' )
     TEST_DIR="browser/base/content/test/tabview"
     MAKE_TARGET="mochitest-browser-chrome"
     ;;
-  ( '-hud' )
+  ( '-hud' | '-webconsole' | '-hudservice' )
     TEST_DIR="browser/devtools/webconsole/test/browser"
     MAKE_TARGET="mochitest-browser-chrome"
     ;;
@@ -45,15 +86,15 @@ case "$TEST_DIR" in
     TEST_DIR="toolkit/components/prompts/test"
     MAKE_TARGET="mochitest-plain"
     ;;
-  ( '-inspector' )
-    TEST_DIR="browser/base/content/test/inspector"
+  ( '-inspector' | '-highlighter' )
+    TEST_DIR="browser/devtools/highlighter/test"
     MAKE_TARGET="mochitest-browser-chrome"
     ;;
-  ( '-styleinspector' )
-    TEST_DIR="browser/devtools/styleinspector/test"
+  ( '-si' | '-styleinspector' )
+    TEST_DIR="browser/devtools/styleinspector/test/browser"
     MAKE_TARGET="mochitest-browser-chrome"
     ;;
-  ( '-sp' )
+  ( '-sp' | '-scratchpad' | '-workspace' )
     TEST_DIR="browser/devtools/scratchpad/test"
     MAKE_TARGET="mochitest-browser-chrome"
     ;;
@@ -70,23 +111,61 @@ case "$TEST_DIR" in
     moztests -dom-mochitest-general
     exit 0;
     ;;
-  ( '-srced' )
+  ( '-srced' | '-sourceeditor' )
     TEST_DIR="browser/devtools/sourceeditor/test"
+    MAKE_TARGET="mochitest-browser-chrome"
+    ;;
+  ( '-styleed' | '-styleeditor' )
+    TEST_DIR="browser/devtools/styleeditor/test"
     MAKE_TARGET="mochitest-browser-chrome"
     ;;
   ( '-devtools' )
     TEST_DIR="browser/devtools"
     MAKE_TARGET="mochitest-browser-chrome"
     ;;
+  ( '-devtools-shared' )
+    TEST_DIR="browser/devtools/shared/test"
+    MAKE_TARGET="mochitest-browser-chrome"
+    ;;
   ( '-devtools-all' )
     moztests -consoleapi
-    moztests -inspector
     moztests -devtools
     exit 0;
     ;;
+  ( '-toolkit-content' )
+    TEST_DIR="toolkit/content/tests"
+    # there are also mochitest-browser-chrome tests
+    MAKE_TARGET="mochitest-chrome"
+    ;;
 esac
 
+# override settings: allow a custom make target, even if the test suite defines 
+# one
+if [[ ! -z "$CUSTOM_MAKE_TARGET" ]]
+then
+  MAKE_TARGET="$CUSTOM_MAKE_TARGET"
+fi
 
+# same for the files filter
+if [[ ! -z "$CUSTOM_TEST_FILE" ]]
+then
+  TEST_FILE="$CUSTOM_TEST_FILE"
+fi
+
+# the folder cannot be overriden
+if [[ -z "$TEST_DIR" ]]
+then
+  TEST_DIR="$CUSTOM_TEST_DIR"
+fi
+
+if [[ ! -d "$TEST_DIR" ]]
+then
+  echo "folder not found: $TEST_DIR"
+  exit 1
+fi
+
+
+# check if the file argument is a file filter
 if [[ ! -z "$TEST_FILE" ]]
 then
   if [[ -f  "${TEST_DIR}/${TEST_FILE}" ]]
@@ -97,14 +176,15 @@ then
   fi
 fi
 
-if [[ ! -d "$TEST_DIR" && ! -f "$TEST_DIR" ]]
+# support running tests through gdb
+if [[ $gdb -eq 1 ]]
 then
-  echo "folder/file not found: $TEST_DIR"
-  exit 1
+  export EXTRA_TEST_ARGS='--debugger=gdb'
 fi
 
 if [[ -d "$TEST_DIR" && ! -z "$FILE_FILTER" ]]
 then
+  # use the files filter
   cd "$TEST_DIR"
 
   FILES=($FILE_FILTER)
