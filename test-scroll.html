@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      #scrollable {
+        border: 1px solid red;
+        height: 400px;
+        overflow: auto;
+      }
+      #content {
+        background: yellow;
+        height: 200%;
+      }
+    </style>
+    <script>
+      function toggleDisplay()
+      {
+        var container = document.querySelector("#container");
+        if (!container.style.display) {
+          container.style.display = 'none';
+        } else {
+          container.style.display = '';
+        }
+      }
+
+      window.onload = function() {
+        if (location.href.indexOf("data:text/html") == 0) {
+          document.querySelector("button").parentNode.innerHTML = "the end";
+          return;
+        }
+
+        var container = document.querySelector("#container");
+        var iframe = document.createElement("iframe");
+        iframe.src = "data:text/html," + escape(document.documentElement.innerHTML);
+        container.innerHTML = '';
+        container.appendChild(iframe);
+      };
+    </script>
+  </head>
+  <body>
+    <div id="container">
+      wow
+      <div id="scrollable">lolz
+        <div id="content">foo bar</div>
+        omg
+      </div>
+      foo
+    </div>
+    <p><button onclick="toggleDisplay()">toggle</button></p>
+  </body>
+</html>
+

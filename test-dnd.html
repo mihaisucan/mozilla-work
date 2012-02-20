@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+	<head>
+    <!-- based on http://www.theflux.co.uk/dragdropce.html -->
+		<title>Drag & Drop with contenteditable - bug demonstration</title>
+
+		<style type="text/css">
+      .demoarea, .controls {
+				padding: 5px;
+				border-bottom: 1px solid black;
+				margin-bottom: 20px;
+      }
+
+			.droparea {
+				display: inline-block;
+				border: 1px solid black;
+				background-color: rgba(0,0,128,1);
+				color: white;
+				width: 150px;
+				height: 150px;
+      }
+
+			.textcontainer {
+				margin-left: 100px;
+				display: inline-block;
+				border: 1px solid black;
+				height: 150px;
+				padding-left: 20px;
+				padding-right: 20px;
+      }
+
+			#ce {
+				display: inline-block;
+				margin-right: 100px;
+				border: 1px solid black;
+				padding: 5px;
+      }
+		</style>
+
+		<script type="text/javascript">
+      function handleDragStart(event) {
+        var text = event.dataTransfer.getData("Text");
+        console.log("Drag starts with", text);
+
+        var newText = "foobar" + new Date().getTime();
+        console.log("Going to change text to", newText);
+
+        event.dataTransfer.setData("Text", newText);
+        console.log("Text rewrote to", event.dataTransfer.getData("Text"));
+      }
+
+      function handleDrop(event) {
+        var text = event.dataTransfer.getData("Text");
+        console.log("Drop handled. Text received:", text);
+        event.preventDefault();
+      }
+
+      function handleDragOver(event) {
+        try {
+          console.log("dragover text", event.dataTransfer.getData("Text"));
+        } catch (ex) {
+          console.log("dragover exception", ex);
+        }
+        event.preventDefault();
+      }
+
+      function handleDragEnter(event) {
+        try {
+          console.log("dragenter text", event.dataTransfer.getData("Text"));
+        } catch (ex) {
+          console.log("dragenter exception", ex);
+        }
+        event.preventDefault();
+      }
+
+      function handleDragLeave(event) {
+        try {
+          console.log("dragleave text", event.dataTransfer.getData("Text"));
+        } catch (ex) {
+          console.log("dragleave exception", ex);
+        }
+        event.preventDefault();
+      }
+
+      function handleDragEnd(event) {
+        try {
+          console.log("dragend text", event.dataTransfer.getData("Text"));
+        } catch (ex) {
+          console.log("dragend exception", ex);
+        }
+        event.preventDefault();
+      }
+
+      function toggleCE() {
+        var ceEl = document.getElementById("ce");
+        var textcontainer = document.querySelector(".textcontainer");
+        var newVal = textcontainer.contentEditable == "true" ? false : true;
+
+        ceEl.innerHTML = newVal ?
+          "textcontainer is contenteditable" :
+          "textcontainer is not contenteditable";
+
+        textcontainer.contentEditable = newVal;
+
+        console.log("contenteditable attribute is", 
+            textcontainer.contentEditable);
+      }
+		</script>
+	</head>
+	<body>
+    <div class="demoarea">
+      <div class="droparea" ondragover="handleDragOver(event)"
+           ondragenter="handleDragEnter(event)"
+           ondragleave="handleDragLeave(event)"
+           ondrop="handleDrop(event)">
+        <span>Drop into me!</span>
+      </div>
+
+      <div class="textcontainer" ondragstart="handleDragStart(event)"
+           ondragend="handleDragEnd(event)">
+        <span>Drag and drop this text please.</span>
+      </div>
+    </div>
+
+    <div class="controls">
+      <div id="ce">textcontainer is not contenteditable</div>
+      <input type="button" value="Switch on/off contenteditable" onclick="toggleCE()">
+    </div>
+  </body>
+</html>

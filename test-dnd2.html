@@ -1,0 +1,103 @@
+<html>
+	<head>
+		<title>Drag & Drop with contenteditable - bug demonstration</title>
+
+		<style type="text/css">
+			.demoarea , .controls
+				{
+				padding: 5px;
+				border-bottom: 1px solid black;
+				margin-bottom: 20px;
+				}
+
+			.droparea
+				{
+				display: inline-block;
+				border: 1px solid black;
+				background-color: rgba(0,0,128,1);
+				color: white;
+				width: 150px;
+				height: 150px;
+				}
+
+			.textcontainer
+				{
+				margin-left: 100px;
+				display: inline-block;
+				border: 1px solid black;
+				height: 150px;
+				padding-left: 20px;
+				padding-right: 20px;
+				}
+
+			#ce
+				{
+				display: inline-block;
+				margin-right: 100px;
+				border: 1px solid black;
+				padding: 5px;
+				}
+		</style>
+
+		<script type="text/javascript">
+			rewriteText = function(event)
+				{
+				var text = event.dataTransfer.getData("text/plain");
+				writeDebug("Drag starting, text to drag: \"" + text + "\"");
+
+				var json = new Object();
+				json.text = Date.now() + text;
+
+				event.dataTransfer.setData("text/plain", JSON.stringify(json));
+				writeDebug("Drag started, text rewrote to: \"" + event.dataTransfer.getData("text/plain") + "\"");
+				}
+
+			handleDrop = function(event)
+				{
+				var text = event.dataTransfer.getData("text/plain");
+				writeDebug("Drop handled. Text received: \"" + text + "\"");
+				}
+
+			writeDebug = function(text)
+				{
+				if (typeof(console) != "undefined")
+					console.log(text);
+
+				var debugArea = self.document.getElementById("debug");
+				var val = debugArea.value;
+				val += text + "\n";
+				debugArea.value = val;
+				}
+
+			toggleCE = function()
+				{
+				var ceEl = self.document.getElementById("ce");
+				var newVal = (ceEl.getAttribute("contenteditable") == "true") ? "false" : "true";
+				ceEl.setAttribute("contenteditable", newVal);
+				if (newVal == "true")
+					ceEl.innerHTML = "This is contenteditable";
+				else
+					ceEl.innerHTML = "This is not contenteditable";
+
+				writeDebug("\ncontenteditable attribute is now set to \"" + newVal + "\"\n");
+				}
+		</script>
+	</head>
+	<body>
+
+		<div class="demoarea">
+			<div class="droparea" ondragover="event.preventDefault();"
+					ondragenter="event.preventDefault()" ondrop="handleDrop(event)"><span>Drop into me!</span></div>
+			<div class="textcontainer" ondragstart="rewriteText(event)" draggable=true>
+				<span>Drag and drop this text please.</span>
+			</div>
+		</div>
+		<div class="controls">
+			<div id="ce" contenteditable="false">This is not contenteditable</div>
+
+			<textarea id="debug" cols="80" rows="10"></textarea>
+			<input type="button" value="Switch on/off contenteditable" onclick="toggleCE()"/>
+		</div>
+	</body>
+</html>
+

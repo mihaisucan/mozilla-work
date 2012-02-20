@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <div contenteditable="">foo bar editable element</div>
+    <script type="text/javascript">
+(function() {
+function onMouseDown(e)
+{
+  console.log(e.type, "which", e.which);
+  if (e.which == 3) {
+    console.log(e.type, "right button");
+    e.preventDefault();
+  }
+}
+
+function onContextMenu(e)
+{
+  console.log(e.type);
+  e.preventDefault();
+}
+
+var div = document.querySelector("div[contenteditable]");
+div.addEventListener("mousedown", onMouseDown, false);
+div.addEventListener("contextmenu", onContextMenu, false);
+})();
+  </script>
+  </body>
+</html>

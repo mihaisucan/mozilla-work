@@ -42,6 +42,7 @@
     <div id="match">lolz<p id="dontmatch">foololz</p></div>
 
     <button>generate error!</button>
+    <button onclick="doMyXHR()">do XHR</button>
     <button onclick="console.clear()">clear</button>
     <button onclick="console.group('foo')">group</button>
     <button onclick="console.groupEnd('foo')">groupEnd</button>
@@ -91,7 +92,11 @@
           foo.bar.intern();
         }, false);
 
-        var myEventHandler = function (ev) {
+        var myEventHandler = function (ev, dbg) {
+          if (dbg) {
+            debugger;
+          }
+
           var result = console.log("log", ev.type, ev);
           console.__returnValue__ = 'test';
           result = console.log("console log result", result);
@@ -118,11 +123,13 @@
           console.debug("debug", ev.type, ev);
         };
 
-        document.body.addEventListener('mousedown', myEventHandler, false);
+        //document.body.addEventListener('mousedown', myEventHandler, false);
         //document.body.addEventListener('mouseup', myEventHandler, false);
         //document.body.addEventListener('click', myEventHandler, false);
         //document.body.addEventListener('dragstart', myEventHandler, false);
         //document.body.addEventListener('dragend', myEventHandler, false);
+
+        window.myEventHandler = myEventHandler;
       })();
 
       function createIframeDocument()
@@ -164,6 +171,18 @@
         var placeholder = document.getElementById("iframesplaceholder");
         placeholder.appendChild(iframe);
       }
+
+      function doMyXHR()
+      {
+        var req = new XMLHttpRequest();
+        req.open('GET', 'http://www.mozilla.org/', true);
+        req.onreadystatechange = function() {
+          if (req.readyState == 4) {
+            console.log("XHR done");
+          }
+        };
+        req.send(null);
+      };
 
       window.addEventListener('load', createIframeDocument, false);
 
@@ -253,15 +272,83 @@ function myOnPaste(e)
   console.log("onpaste!");
 }
 
+function myOnMouseDown(e)
+{
+  return;
+  console.log("myOnMouseDown", e.type, "which", e.which, "phase", e.eventPhase);
+  if (e.which == 3) {
+    console.log("myOnMouseDown preventDefault");
+    var div = document.querySelector("div[contenteditable]");
+    div.contentEditable = false;
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.stopImmediatePropagation) {
+      e.stopImmediatePropagation();
+    }
+  }
+}
+
+function myOnMouseUp(e)
+{
+  return;
+  console.log("myOnMouseUp", e.type, "which", e.which, "phase", e.eventPhase);
+  if (e.which == 3) {
+    console.log("myOnMouseUp preventDefault");
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.stopImmediatePropagation) {
+      e.stopImmediatePropagation();
+    }
+  }
+}
+
+function myOnClick(e)
+{
+  return;
+  console.log("myOnClick", e.type, "which", e.which, "phase", e.eventPhase);
+  if (e.which == 3) {
+    console.log("myOnClick preventDefault");
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.stopImmediatePropagation) {
+      e.stopImmediatePropagation();
+    }
+  }
+}
+
+function myOnContextMenu(e)
+{
+  return;
+  console.log("myOnContextMenu", e.type, "phase", e.eventPhase);
+  e.preventDefault();
+  e.stopPropagation();
+  if (e.stopImmediatePropagation) {
+    e.stopImmediatePropagation();
+  }
+}
+
+window.addEventListener("load", function _onload() {
+    window.removeEventListener("load", _onload, false);
+
+    var div = document.querySelector("div[contenteditable]");
+    document.body.addEventListener("mousedown", myOnMouseDown, true);
+    document.body.addEventListener("mouseup", myOnMouseUp, true);
+    document.body.addEventListener("click", myOnClick, true);
+    document.body.addEventListener("contextmenu", myOnContextMenu, true);
+}, false);
+
 </script>
     <script type="application/javascript;version=1.7" src="test.js"></script>
     <img src="lolz.png">
     <div id="iframesplaceholder" style="display:inline"></div>
-    <p><button onclick="scrollTest()">scroll test</button></p>
+    <p><button onclick="scrollTest()">scroll test</button> <button onclick="myEventHandler(event, true)">debug!</button></p>
     <div style="border: 1px red solid" id="bigarea">big area</div>
     <p>booo</p>
-    <div id="editable" contenteditable="" onpaste="myOnPaste(event)">foo bar 
+    <div id="editable">
+      <div>div#editable</div>
+      <div contenteditable="" onpaste="myOnPaste(event)">foo bar pre 
       editable</div>
+    </div>
     <textarea>foo</textarea>
     <p><button onclick="myDoPaste()">paste!</button></p>
   </body>

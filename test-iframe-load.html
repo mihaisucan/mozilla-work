@@ -1,0 +1,21 @@
+<html>
+  <body>
+    <div id="test">placeholder</div>
+    <p><button onclick="testIframeLoad()">test</button></p>
+
+    <script>
+      window.onload = function() {
+        setTimeout(function() {
+        var iframe = document.createElement("IFRAME");
+        iframe.addEventListener("load", function() {
+          console.log("iframe loaded");
+        }, false);
+
+        var dest = document.getElementById("test");
+        dest.appendChild(iframe);
+      }, 1000);
+    };
+    </script>
+  </body>
+</html>
+
