@@ -10,6 +10,7 @@ MY_SELF="${0##*/}"
 
 gdb=0
 dbg=0
+xvfb=0
 
 # ugly arguments parsing
 expected="dir"
@@ -21,6 +22,9 @@ for i do
       ;;
     ('-dbg')
       dbg=1
+      ;;
+    ('-xvfb')
+      xvfb=1
       ;;
     ('-target')
       expected="target"
@@ -70,46 +74,51 @@ fi
 MAKE_TARGET="mochitest-browser-chrome"
 
 case "$TEST_SUITE" in
-  ( '-bbase' )
-    TEST_DIR="browser/base/content/test"
-    MAKE_TARGET="mochitest-browser-chrome"
-    ;;
-  ( '-tabview' | '-panorama' )
-    TEST_DIR="browser/base/content/test/tabview"
-    MAKE_TARGET="mochitest-browser-chrome"
-    ;;
   ( '-hud' | '-webconsole' | '-hudservice' )
-    TEST_DIR="browser/devtools/webconsole/test/browser"
+    TEST_DIR="browser/devtools/webconsole/test"
     MAKE_TARGET="mochitest-browser-chrome"
     ;;
-  ( '-prompts' )
-    TEST_DIR="toolkit/components/prompts/test"
-    MAKE_TARGET="mochitest-plain"
+  ( '-consoleapi' )
+    moztests -dom-browser
+    echo;
+    moztests -dom-mochitest-general
+
+    echo;
+    echo "${TEST_SUITE}: It took $SECONDS seconds for the tests to run."
+    exit 0;
     ;;
   ( '-inspector' | '-highlighter' )
     TEST_DIR="browser/devtools/highlighter/test"
     MAKE_TARGET="mochitest-browser-chrome"
     ;;
   ( '-si' | '-styleinspector' )
-    TEST_DIR="browser/devtools/styleinspector/test/browser"
+    TEST_DIR="browser/devtools/styleinspector/test"
     MAKE_TARGET="mochitest-browser-chrome"
     ;;
   ( '-sp' | '-scratchpad' | '-workspace' )
+    if [[ ! -z "$CUSTOM_TEST_FILE" ]]
+    then
+      # this is a shortcut so I can run specific tests from the devtools
+      # Scratchpad folder
+      cmd="$@"
+      new_cmd="${cmd/$TEST_SUITE/-devtools-scratchpad}"
+      moztests $new_cmd
+      exit $?
+    fi
+
+    # this runs all of the known Scratchpad tests
+    moztests -sessionstore *scratchpad*js
+    echo;
+    moztests -devtools-scratchpad
+
+    echo;
+    echo "${TEST_SUITE}: It took $SECONDS seconds for the tests to run."
+    exit 0
+    ;;
+  ( '-devtools-scratchpad' )
+    # run only the browser/devtools/scratchpad tests
     TEST_DIR="browser/devtools/scratchpad/test"
     MAKE_TARGET="mochitest-browser-chrome"
-    ;;
-  ( '-dom-browser' )
-    TEST_DIR="dom/tests/browser"
-    MAKE_TARGET="mochitest-browser-chrome"
-    ;;
-  ( '-dom-mochitest-general' )
-    TEST_DIR="dom/tests/mochitest/general"
-    MAKE_TARGET="mochitest-plain"
-    ;;
-  ( '-consoleapi' )
-    moztests -dom-browser
-    moztests -dom-mochitest-general
-    exit 0;
     ;;
   ( '-srced' | '-sourceeditor' )
     TEST_DIR="browser/devtools/sourceeditor/test"
@@ -119,7 +128,48 @@ case "$TEST_SUITE" in
     TEST_DIR="browser/devtools/styleeditor/test"
     MAKE_TARGET="mochitest-browser-chrome"
     ;;
-  ( '-devtools' )
+  ( '-srced-all' )
+    # run all the tests of all tools that use the Source Editor component
+    moztests -srced
+    echo;
+    moztests -scratchpad
+    echo;
+    moztests -styleeditor
+    echo;
+    moztests -browser-debugger
+
+    echo;
+    echo "${TEST_SUITE}: It took $SECONDS seconds for the tests to run."
+    exit 0
+    ;;
+  ( '-tilt' )
+    TEST_DIR="browser/devtools/tilt/test"
+    MAKE_TARGET="mochitest-browser-chrome"
+    ;;
+  ( '-browser-debugger' )
+    TEST_DIR="browser/devtools/debugger/test"
+    MAKE_TARGET="mochitest-browser-chrome"
+    ;;
+  ( '-toolkit-debugger' )
+    TEST_DIR="toolkit/devtools/debugger/tests"
+    MAKE_TARGET="xpcshell-tests"
+    ;;
+  ( '-jsdbg' | '-debugger' )
+    # run the js debugger tests
+    moztests -toolkit-debugger
+    echo;
+    moztests -browser-debugger
+
+    echo;
+    echo "${TEST_SUITE}: It took $SECONDS seconds for the tests to run."
+    exit 0
+    ;;
+  ( '-toolkit-devtools' )
+    moztests -toolkit-debugger
+    exit 0
+    ;;
+  ( '-browser-devtools' )
+    # run tests only from the browser/devtools folder
     TEST_DIR="browser/devtools"
     MAKE_TARGET="mochitest-browser-chrome"
     ;;
@@ -127,15 +177,48 @@ case "$TEST_SUITE" in
     TEST_DIR="browser/devtools/shared/test"
     MAKE_TARGET="mochitest-browser-chrome"
     ;;
-  ( '-devtools-all' )
+  ( '-devtools' )
+    # run all of the known devtools tests
+    moztests -sessionstore *scratchpad*js
+    echo;
     moztests -consoleapi
-    moztests -devtools
-    exit 0;
+    echo;
+    moztests -toolkit-devtools
+    echo;
+    moztests -browser-devtools
+
+    echo;
+    echo "${TEST_SUITE}: It took $SECONDS seconds for the tests to run."
+    exit 0
     ;;
   ( '-toolkit-content' )
     TEST_DIR="toolkit/content/tests"
     # there are also mochitest-browser-chrome tests
     MAKE_TARGET="mochitest-chrome"
+    ;;
+  ( '-sessionstore' )
+    TEST_DIR="browser/components/sessionstore/test"
+    MAKE_TARGET="mochitest-browser-chrome"
+    ;;
+  ( '-bbase' )
+    TEST_DIR="browser/base/content/test"
+    MAKE_TARGET="mochitest-browser-chrome"
+    ;;
+  ( '-tabview' | '-panorama' )
+    TEST_DIR="browser/base/content/test/tabview"
+    MAKE_TARGET="mochitest-browser-chrome"
+    ;;
+  ( '-prompts' )
+    TEST_DIR="toolkit/components/prompts/test"
+    MAKE_TARGET="mochitest-plain"
+    ;;
+  ( '-dom-browser' )
+    TEST_DIR="dom/tests/browser"
+    MAKE_TARGET="mochitest-browser-chrome"
+    ;;
+  ( '-dom-mochitest-general' )
+    TEST_DIR="dom/tests/mochitest/general"
+    MAKE_TARGET="mochitest-plain"
     ;;
 esac
 
@@ -182,6 +265,17 @@ then
   export EXTRA_TEST_ARGS='--debugger=gdb'
 fi
 
+if [[ "$MAKE_TARGET" == "xpcshell-tests" ]]
+then
+  export EXTRA_TEST_ARGS="$EXTRA_TEST_ARGS --keep-going"
+fi
+
+cmd="make"
+if [[ $xvfb -eq 1 ]]
+then
+  cmd="xvfb-run $cmd"
+fi
+
 if [[ -d "$TEST_DIR" && ! -z "$FILE_FILTER" ]]
 then
   # use the files filter
@@ -201,7 +295,11 @@ then
 
     found=1
     export TEST_PATH="${TEST_DIR}/$t"
-    make -C "$OBJ_DIR" "$MAKE_TARGET"
+    currentcmd="$cmd -C $OBJ_DIR $MAKE_TARGET"
+    echo;
+    echo "$currentcmd"
+    echo;
+    $currentcmd
   done
 
   if [[ "$found" -eq 0 ]]
@@ -210,9 +308,22 @@ then
     exit 1
   fi
 
+  echo;
+  echo "$TEST_DIR ${FILE_FILTER}: It took $SECONDS seconds for the tests to run."
   exit 0
+
 else
+  cd "$OBJ_DIR"
+
   export TEST_PATH="$TEST_DIR"
-  make -C "$OBJ_DIR" "$MAKE_TARGET"
-  exit $?
+  currentcmd="$cmd -C . $MAKE_TARGET"
+  echo "$currentcmd"
+  echo;
+  $currentcmd
+  result=$?
+
+  echo;
+  echo "${TEST_DIR}: It took $SECONDS seconds for the tests to run."
+
+  exit $result
 fi
