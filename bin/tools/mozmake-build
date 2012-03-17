@@ -6,8 +6,8 @@ MY_SELF="${0##*/}"
 
 #export CC="ccache gcc"
 #export CXX="ccache g++"
-export CC='clang -Qunused-arguments -fcolor-diagnostics'
-export CXX='clang++ -Qunused-arguments -fcolor-diagnostics'
+export CC='clang -Qunused-arguments -fcolor-diagnostics -w'
+export CXX='clang++ -Qunused-arguments -fcolor-diagnostics -w'
 
 if [[ "$1" == "-dbg" ]]
 then
