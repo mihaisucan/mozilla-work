@@ -2,6 +2,9 @@
 
 # This script allows me to start the mozilla build from my cloned repo.
 
+MY_DIR="$( cd -P "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source "$MY_DIR/../../config.local"
+
 gdb=n
 dbg=n
 
@@ -17,11 +20,17 @@ for i do
   esac
 done
 
+if [[ ! -d "$CFG_BUILDS_DIR" ]]
+then
+  echo "folder not found: $CFG_BUILDS_DIR"
+  exit 1
+fi
+
 if [[ "$dbg" == "y" ]]
 then
-  ffdir="ff-dbg-obj/dist/bin"
+  ffdir="$CFG_BUILDS_DIR/$MY_SRC_DIR/dbg/dist/bin"
 else
-  ffdir="ff-obj/dist/bin"
+  ffdir="$CFG_BUILDS_DIR/$MY_SRC_DIR/opt/dist/bin"
 fi
 
 if [[ ! -d "$ffdir" ]]

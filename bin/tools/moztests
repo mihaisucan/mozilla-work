@@ -7,6 +7,8 @@
 
 MY_PWD="$PWD"
 MY_SELF="${0##*/}"
+MY_DIR="$( cd -P "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source "$MY_DIR/../../config.local"
 
 gdb=0
 dbg=0
@@ -59,9 +61,9 @@ done
 
 if [[ $dbg -eq 1 ]]
 then
-  OBJ_DIR="ff-dbg-obj"
+  OBJ_DIR="$CFG_BUILDS_DIR/$MY_SRC_DIR/dbg"
 else
-  OBJ_DIR="ff-obj"
+  OBJ_DIR="$CFG_BUILDS_DIR/$MY_SRC_DIR/opt"
 fi
 
 if [[ ! -d "$OBJ_DIR" ]]
@@ -313,10 +315,8 @@ then
   exit 0
 
 else
-  cd "$OBJ_DIR"
-
   export TEST_PATH="$TEST_DIR"
-  currentcmd="$cmd -C . $MAKE_TARGET"
+  currentcmd="$cmd -C $OBJ_DIR $MAKE_TARGET"
   echo "$currentcmd"
   echo;
   $currentcmd

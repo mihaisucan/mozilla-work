@@ -1,0 +1,94 @@
+#!/bin/bash
+
+# Quickly start dbg/opt mozilla firefox builds.
+
+MY_SELF="${0##*/}"
+MY_DIR="$( cd -P "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source "$MY_DIR/../../config.local"
+
+dbg=0
+clobber=0
+configure=0
+for i do
+  case $i in
+    ('-dbg')
+      dbg=1
+      ;;
+    ('-clobber')
+      clobber=1
+      ;;
+    ('-configure')
+      configure=1
+      ;;
+  esac
+done
+
+if [[ ! -d "$CFG_BUILDS_DIR" ]]
+then
+  echo "folder not found: $CFG_BUILDS_DIR"
+  exit 1
+fi
+
+if [[ "$CFG_BUILD_CLANG" -eq 1 ]]
+then
+  export CC='clang -Qunused-arguments -fcolor-diagnostics -w'
+  export CXX='clang++ -Qunused-arguments -fcolor-diagnostics -w'
+fi
+
+if [[ ! -f client.mk ]]
+then
+  echo "file not found: client.mk"
+  exit 1
+fi
+
+if [[ ! -d "$CFG_BUILDS_DIR" ]]
+then
+  echo "folder not found: $CFG_BUILDS_DIR"
+  exit
+fi
+
+export MOZ_OBJDIR="$CFG_BUILDS_DIR/$MY_SRC_DIR"
+
+if [[ ! -d "$MOZ_OBJDIR" ]]
+then
+  mkdir "$MOZ_OBJDIR"
+fi
+
+if [[ $dbg -eq 1 ]]
+then
+  export MOZ_OBJDIR="$CFG_BUILDS_DIR/$MY_SRC_DIR/dbg"
+  export MOZCONFIG="$MY_DIR/../../mozconfig/dbg"
+else
+  export MOZ_OBJDIR="$CFG_BUILDS_DIR/$MY_SRC_DIR/opt"
+  export MOZCONFIG="$MY_DIR/../../mozconfig/opt"
+fi
+
+if [[ ! -f "$MOZCONFIG" ]]
+then
+  echo "file not found: $MOZCONFIG"
+  exit 1
+fi
+
+if [[ $clobber -eq 1 ]]
+then
+  rm -r "$MOZ_OBJDIR"
+  echo "Build clobbered, removed $MOZ_OBJDIR"
+  exit 0
+fi
+
+if [[ $configure -eq 1 ]]
+then
+  make -f client.mk configure
+fi
+
+make -f client.mk build
+
+if [[ "$?" -eq 0 ]]
+then
+  notify-send "$MY_SELF" "Build ready. It took $SECONDS seconds to build Mozilla." -i "info" -u "low"
+  echo "Build ready. It took $SECONDS seconds to build Mozilla.";
+else
+  notify-send "$MY_SELF" "Build failed. It took $SECONDS seconds to fail." -i "error" -u "critical"
+
+  echo "Build failed. It took $SECONDS seconds to fail.";
+fi

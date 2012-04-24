@@ -1,0 +1,6 @@
+
+MY_SRC_DIR="${PWD##*/}"
+CFG_BUILD_CLANG=1
+CFG_BUILDS_DIR="$HOME/Public/builds/firefox"
+
+# vim:set ft=sh:
