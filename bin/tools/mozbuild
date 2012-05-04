@@ -9,6 +9,8 @@ source "$MY_DIR/../../config.local"
 dbg=0
 clobber=0
 configure=0
+both=0
+argslist=""
 for i do
   case $i in
     ('-dbg')
@@ -16,12 +18,24 @@ for i do
       ;;
     ('-clobber')
       clobber=1
+      arglist="$i $argslist"
       ;;
     ('-configure')
       configure=1
+      arglist="$i $argslist"
+      ;;
+    ('-both')
+      both=1
       ;;
   esac
 done
+
+if [[ "$both" -eq 1 ]]
+then
+  $MY_SELF $argslist
+  $MY_SELF -dbg $argslist
+  exit $?
+fi
 
 if [[ ! -d "$CFG_BUILDS_DIR" ]]
 then
@@ -56,12 +70,13 @@ fi
 
 if [[ $dbg -eq 1 ]]
 then
-  export MOZ_OBJDIR="$CFG_BUILDS_DIR/$MY_SRC_DIR/dbg"
-  export MOZCONFIG="$MY_DIR/../../mozconfig/dbg"
+  buildtype="dbg"
 else
-  export MOZ_OBJDIR="$CFG_BUILDS_DIR/$MY_SRC_DIR/opt"
-  export MOZCONFIG="$MY_DIR/../../mozconfig/opt"
+  buildtype="opt"
 fi
+
+export MOZ_OBJDIR="$CFG_BUILDS_DIR/$MY_SRC_DIR/$buildtype"
+export MOZCONFIG="$MY_DIR/../../mozconfig/$buildtype"
 
 if [[ ! -f "$MOZCONFIG" ]]
 then
@@ -72,7 +87,7 @@ fi
 if [[ $clobber -eq 1 ]]
 then
   rm -r "$MOZ_OBJDIR"
-  echo "Build clobbered, removed $MOZ_OBJDIR"
+  echo "Build $buildtype clobbered, removed $MOZ_OBJDIR"
   exit 0
 fi
 
@@ -85,10 +100,11 @@ make -f client.mk build
 
 if [[ "$?" -eq 0 ]]
 then
-  notify-send "$MY_SELF" "Build ready. It took $SECONDS seconds to build Mozilla." -i "info" -u "low"
-  echo "Build ready. It took $SECONDS seconds to build Mozilla.";
+  msg="Firefox build $buildtype ready. It took $SECONDS seconds"
+  notify-send "$MY_SELF" "$msg" -i "info" -u "low"
 else
-  notify-send "$MY_SELF" "Build failed. It took $SECONDS seconds to fail." -i "error" -u "critical"
-
-  echo "Build failed. It took $SECONDS seconds to fail.";
+  msg="Firefox build $buildtype failed. It took $SECONDS seconds"
+  notify-send "$MY_SELF" "$msg" -i "error" -u "critical"
 fi
+
+echo "$msg";
