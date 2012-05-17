@@ -45,11 +45,10 @@ if [[ "$MY_OS" == "Darwin" ]]
 then
   if [[ "$dbg" == "y" ]]
   then
-    cmd="NightlyDebug.app"
+    cmd="NightlyDebug.app/Contents/MacOS/firefox"
   else
-    cmd="Nightly.app"
+    cmd="Nightly.app/Contents/MacOS/firefox"
   fi
-  cmd="open $cmd --args"
 else
   cmd="./bin/firefox"
 fi
