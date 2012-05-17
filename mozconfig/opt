@@ -7,5 +7,6 @@ ac_add_options --enable-tests
 ac_add_options --with-ccache
 ac_add_options --enable-chrome-format=symlink
 ac_add_options --disable-debug-symbols
+#ac_add_options --enable-gstreamer
 #ac_add_options --enable-e10s-compat
 
