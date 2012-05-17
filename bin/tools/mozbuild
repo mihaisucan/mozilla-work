@@ -11,6 +11,7 @@ clobber=0
 configure=0
 both=0
 argslist=""
+use_smartmake=0
 for i do
   case $i in
     ('-dbg')
@@ -22,6 +23,10 @@ for i do
       ;;
     ('-configure')
       configure=1
+      arglist="$i $argslist"
+      ;;
+    ('-smart' | '-inc')
+      use_smartmake=1
       arglist="$i $argslist"
       ;;
     ('-both')
@@ -96,7 +101,12 @@ then
   make -f client.mk configure
 fi
 
-make -f client.mk build
+if [[ $use_smartmake -eq 1 ]]
+then
+  mozsmartmake.py
+else
+  make -f client.mk build
+fi
 
 if [[ "$?" -eq 0 ]]
 then
