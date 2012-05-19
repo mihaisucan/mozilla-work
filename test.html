@@ -41,7 +41,8 @@
     <div class="foobar">foobar</div>
     <div id="match">lolz<p id="dontmatch">foololz</p></div>
 
-    <button>generate error!</button>
+    <button id=generateError>generate error!</button>
+    <button id=consoleAPI>console api</button>
     <button onclick="doMyXHR()">do XHR</button>
     <button onclick="console.clear()">clear</button>
     <button onclick="console.group('foo')">group</button>
@@ -67,11 +68,8 @@
           return a+1 + b+2;
         }
 
-        var btn = document.getElementsByTagName('button')[0];
-        btn.addEventListener('click', function(ev) {
-          console.time("foo");
-          console.dir(document.styleSheets, console);
-          foobarTraceMe1(1, 2);
+        var btnGenerateError = document.querySelector("#generateError");
+        btnGenerateError.addEventListener("click", function(ev) {
           document.body.childNodes[1000];
           if (ev.preventBubble) {
             ev.preventBubble();
@@ -81,6 +79,16 @@
           } catch (ex) {
             window.lastException = ex;
           }
+          foo.bar.intern();
+        }, false);
+
+        var btnConsoleAPI = document.querySelector("#consoleAPI");
+        btnConsoleAPI.addEventListener("click", function(ev) {
+          myEventHandler(ev);
+
+          console.time("foo");
+          console.dir(document.styleSheets, console);
+          foobarTraceMe1(1, 2);
           var result = console.timeEnd("foo");
           console.log("timeEnd result " + result);
 
@@ -89,7 +97,6 @@
 
           console.time();
           console.timeEnd();
-          foo.bar.intern();
         }, false);
 
         var myEventHandler = function (ev, dbg) {
