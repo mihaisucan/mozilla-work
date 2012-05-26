@@ -3,7 +3,7 @@
 # This script allows me to start the mozilla build from my cloned repo.
 
 MY_DIR="$( cd -P "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-source "$MY_DIR/../../config.local"
+source "$MY_DIR/_mozinclude"
 
 gdb=n
 dbg=n
@@ -28,9 +28,9 @@ fi
 
 if [[ "$dbg" == "y" ]]
 then
-  ffdir="$CFG_BUILDS_DIR/$MY_SRC_DIR/dbg/dist"
+  ffdir="$CFG_BUILDS_DIR/$MY_REPO_NAME/dbg/dist"
 else
-  ffdir="$CFG_BUILDS_DIR/$MY_SRC_DIR/opt/dist"
+  ffdir="$CFG_BUILDS_DIR/$MY_REPO_NAME/opt/dist"
 fi
 
 if [[ ! -d "$ffdir" ]]

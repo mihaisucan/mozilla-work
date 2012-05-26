@@ -8,11 +8,13 @@
 MY_PWD="$PWD"
 MY_SELF="${0##*/}"
 MY_DIR="$( cd -P "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-source "$MY_DIR/../../config.local"
+source "$MY_DIR/_mozinclude"
 
 gdb=0
 dbg=0
 xvfb=0
+nofail=0
+argslist=""
 
 # ugly arguments parsing
 expected="dir"
@@ -21,12 +23,19 @@ for i do
     ('-gdb')
       gdb=1
       dbg=1
+      argslist="$i $argslist"
       ;;
     ('-dbg')
       dbg=1
+      argslist="$i $argslist"
       ;;
     ('-xvfb')
       xvfb=1
+      argslist="$i $argslist"
+      ;;
+    ('-nofail')
+      nofail=1
+      argslist="$i $argslist"
       ;;
     ('-target')
       expected="target"
@@ -59,11 +68,15 @@ for i do
   esac
 done
 
+MY_SELF_ARGS="$MY_SELF $argslist"
+
+cd "$MY_REPO_DIR"
+
 if [[ $dbg -eq 1 ]]
 then
-  OBJ_DIR="$CFG_BUILDS_DIR/$MY_SRC_DIR/dbg"
+  OBJ_DIR="$CFG_BUILDS_DIR/$MY_REPO_NAME/dbg"
 else
-  OBJ_DIR="$CFG_BUILDS_DIR/$MY_SRC_DIR/opt"
+  OBJ_DIR="$CFG_BUILDS_DIR/$MY_REPO_NAME/opt"
 fi
 
 if [[ ! -d "$OBJ_DIR" ]]
@@ -71,6 +84,42 @@ then
   echo "folder not found: $OBJ_DIR"
   exit 1
 fi
+
+function run_self {
+  $MY_SELF_ARGS $1
+  self_result=$?
+  if [[ $nofail -ne 1 && $self_result -ne 0 ]]
+  then
+    echo;
+    my_notification $self_result "$MY_SELF_ARGS $1 execution failed!"
+    echo "Timer: $SECONDS seconds."
+    exit 1
+  fi
+}
+
+function subtests_end {
+  echo;
+  echo "${TEST_SUITE}: It took $SECONDS seconds for the tests to run."
+  exit 0
+}
+
+function run_test {
+  export TEST_PATH="$1"
+  currentcmd="$RUN_TEST_CMD -C $OBJ_DIR $MAKE_TARGET"
+  echo;
+  echo "TEST_PATH=$TEST_PATH"
+  echo "$currentcmd"
+  echo;
+  $currentcmd
+  cmd_result=$?
+  if [[ $nofail -ne 1 && $cmd_result -ne 0 ]]
+  then
+    echo;
+    my_notification $cmd_result "$TEST_PATH test failed!"
+    echo "Timer: $SECONDS seconds."
+    exit 1
+  fi
+}
 
 # default make target
 MAKE_TARGET="mochitest-browser-chrome"
@@ -81,13 +130,11 @@ case "$TEST_SUITE" in
     MAKE_TARGET="mochitest-browser-chrome"
     ;;
   ( '-consoleapi' )
-    moztests -dom-browser
+    run_self -dom-browser
     echo;
-    moztests -dom-mochitest-general
+    run_self -dom-mochitest-general
 
-    echo;
-    echo "${TEST_SUITE}: It took $SECONDS seconds for the tests to run."
-    exit 0;
+    subtests_end
     ;;
   ( '-inspector' | '-highlighter' )
     TEST_DIR="browser/devtools/highlighter/test"
@@ -97,25 +144,21 @@ case "$TEST_SUITE" in
     TEST_DIR="browser/devtools/styleinspector/test"
     MAKE_TARGET="mochitest-browser-chrome"
     ;;
-  ( '-sp' | '-scratchpad' | '-workspace' )
+  ( '-sp' | '-scratchpad' )
     if [[ ! -z "$CUSTOM_TEST_FILE" ]]
     then
       # this is a shortcut so I can run specific tests from the devtools
       # Scratchpad folder
-      cmd="$@"
-      new_cmd="${cmd/$TEST_SUITE/-devtools-scratchpad}"
-      moztests $new_cmd
+      run_self -devtools-scratchpad "$CUSTOM_TEST_FILE"
       exit $?
     fi
 
     # this runs all of the known Scratchpad tests
-    moztests -sessionstore *scratchpad*js
+    run_self "-sessionstore *scratchpad*js"
     echo;
-    moztests -devtools-scratchpad
+    run_self -devtools-scratchpad
 
-    echo;
-    echo "${TEST_SUITE}: It took $SECONDS seconds for the tests to run."
-    exit 0
+    subtests_end
     ;;
   ( '-devtools-scratchpad' )
     # run only the browser/devtools/scratchpad tests
@@ -132,17 +175,15 @@ case "$TEST_SUITE" in
     ;;
   ( '-srced-all' )
     # run all the tests of all tools that use the Source Editor component
-    moztests -srced
+    run_self -srced
     echo;
-    moztests -scratchpad
+    run_self -scratchpad
     echo;
-    moztests -styleeditor
+    run_self -styleeditor
     echo;
-    moztests -browser-debugger
+    run_self -browser-debugger
 
-    echo;
-    echo "${TEST_SUITE}: It took $SECONDS seconds for the tests to run."
-    exit 0
+    subtests_end
     ;;
   ( '-tilt' )
     TEST_DIR="browser/devtools/tilt/test"
@@ -158,17 +199,15 @@ case "$TEST_SUITE" in
     ;;
   ( '-jsdbg' | '-debugger' )
     # run the js debugger tests
-    moztests -toolkit-debugger
+    run_self -toolkit-debugger
     echo;
-    moztests -browser-debugger
+    run_self -browser-debugger
 
-    echo;
-    echo "${TEST_SUITE}: It took $SECONDS seconds for the tests to run."
-    exit 0
+    subtests_end
     ;;
   ( '-toolkit-devtools' )
-    moztests -toolkit-debugger
-    exit 0
+    run_self -toolkit-debugger
+    exit $?
     ;;
   ( '-browser-devtools' )
     # run tests only from the browser/devtools folder
@@ -181,17 +220,15 @@ case "$TEST_SUITE" in
     ;;
   ( '-devtools' )
     # run all of the known devtools tests
-    moztests -sessionstore *scratchpad*js
+    run_self -sessionstore *scratchpad*js
     echo;
-    moztests -consoleapi
+    run_self -consoleapi
     echo;
-    moztests -toolkit-devtools
+    run_self -toolkit-devtools
     echo;
-    moztests -browser-devtools
+    run_self -browser-devtools
 
-    echo;
-    echo "${TEST_SUITE}: It took $SECONDS seconds for the tests to run."
-    exit 0
+    subtests_end
     ;;
   ( '-toolkit-content' )
     TEST_DIR="toolkit/content/tests"
@@ -240,7 +277,13 @@ fi
 # the folder cannot be overriden
 if [[ -z "$TEST_DIR" ]]
 then
-  TEST_DIR="$CUSTOM_TEST_DIR"
+  if [[ ! -d "$MY_PWD/$CUSTOM_TEST_DIR" ]]
+  then
+    echo "folder not found: $CUSTOM_TEST_DIR"
+    exit 1
+  fi
+  TEST_DIR="$(cd -P "$MY_PWD/$CUSTOM_TEST_DIR" && pwd)"
+  TEST_DIR="$(relative_path $MY_REPO_DIR $TEST_DIR)"
 fi
 
 if [[ ! -d "$TEST_DIR" ]]
@@ -272,10 +315,10 @@ then
   export EXTRA_TEST_ARGS="$EXTRA_TEST_ARGS --keep-going"
 fi
 
-cmd="make"
+RUN_TEST_CMD="$MY_MAKE"
 if [[ $xvfb -eq 1 ]]
 then
-  cmd="xvfb-run $cmd"
+  RUN_TEST_CMD="xvfb-run $RUN_TEST_CMD"
 fi
 
 if [[ -d "$TEST_DIR" && ! -z "$FILE_FILTER" ]]
@@ -285,7 +328,11 @@ then
 
   FILES=($FILE_FILTER)
 
-  cd "$MY_PWD"
+  cd "$MY_REPO_DIR"
+
+  echo;
+  echo "Files matched: ${FILES[@]}"
+  echo;
 
   found=0
   for t in "${FILES[@]}"
@@ -296,12 +343,7 @@ then
     fi
 
     found=1
-    export TEST_PATH="${TEST_DIR}/$t"
-    currentcmd="$cmd -C $OBJ_DIR $MAKE_TARGET"
-    echo;
-    echo "$currentcmd"
-    echo;
-    $currentcmd
+    run_test "${TEST_DIR}/$t"
   done
 
   if [[ "$found" -eq 0 ]]
@@ -311,19 +353,12 @@ then
   fi
 
   echo;
-  echo "$TEST_DIR ${FILE_FILTER}: It took $SECONDS seconds for the tests to run."
+  echo "$TEST_SUITE $TEST_DIR ${FILE_FILTER}: It took $SECONDS seconds for the tests to run."
   exit 0
 
 else
-  export TEST_PATH="$TEST_DIR"
-  currentcmd="$cmd -C $OBJ_DIR $MAKE_TARGET"
-  echo "$currentcmd"
-  echo;
-  $currentcmd
-  result=$?
+  run_test "$TEST_DIR"
 
   echo;
-  echo "${TEST_DIR}: It took $SECONDS seconds for the tests to run."
-
-  exit $result
+  echo "$TEST_SUITE ${TEST_DIR}: It took $SECONDS seconds for the tests to run."
 fi

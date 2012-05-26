@@ -1,6 +1,10 @@
 #!/bin/bash
 
-export PATH="${HOME}/bin/mozilla-tools:${PATH}"
+DO_NOT_EXIT=1
+MY_DIR="$( cd -P "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source "$MY_DIR/_mozinclude"
 
-alias mozaddons=". ~/bin/mozilla-tools/mozaddons"
+export PATH="${MY_DIR}:${PATH}"
+
+alias mozaddons=". ${MY_DIR}/mozaddons"
 

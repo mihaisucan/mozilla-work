@@ -1,0 +1,153 @@
+#!/bin/bash
+
+# Quickly start dbg/opt mozilla firefox builds.
+
+MY_SELF="${0##*/}"
+MY_DIR="$( cd -P "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source "$MY_DIR/_mozinclude"
+
+dbg=0
+clobber=0
+configure=0
+both=0
+argslist=""
+use_smartmake=0
+for i do
+  case $i in
+    ('-dbg')
+      dbg=1
+      ;;
+    ('-clobber')
+      clobber=1
+      argslist="$i $argslist"
+      ;;
+    ('-configure')
+      configure=1
+      argslist="$i $argslist"
+      ;;
+    ('-smart' | '-inc')
+      use_smartmake=1
+      argslist="$i $argslist"
+      ;;
+    ('-both')
+      both=1
+      ;;
+  esac
+done
+
+if [[ "$both" -eq 1 ]]
+then
+  $MY_SELF $argslist
+  $MY_SELF -dbg $argslist
+  exit $?
+fi
+
+if [[ ! -d "$CFG_BUILDS_DIR" ]]
+then
+  echo "folder not found: $CFG_BUILDS_DIR"
+  exit 1
+fi
+
+if [[ "$CFG_BUILD_CLANG" -eq 1 ]]
+then
+  export CC='clang -Qunused-arguments -fcolor-diagnostics -w'
+  export CXX='clang++ -Qunused-arguments -fcolor-diagnostics -w'
+fi
+
+cd "$MY_REPO_DIR"
+
+if [[ ! -f client.mk ]]
+then
+  echo "file not found: client.mk"
+  exit 1
+fi
+
+if [[ ! -d "$CFG_BUILDS_DIR" ]]
+then
+  echo "folder not found: $CFG_BUILDS_DIR"
+  exit 0
+fi
+
+export MOZ_OBJDIR="$CFG_BUILDS_DIR/$MY_REPO_NAME"
+
+if [[ ! -d "$MOZ_OBJDIR" ]]
+then
+  mkdir "$MOZ_OBJDIR"
+fi
+
+if [[ $dbg -eq 1 ]]
+then
+  buildtype="dbg"
+else
+  buildtype="opt"
+fi
+
+export MOZ_OBJDIR="$CFG_BUILDS_DIR/$MY_REPO_NAME/$buildtype"
+export MOZCONFIG="$MY_DIR/../mozconfig/$buildtype"
+
+if [[ ! -f "$MOZCONFIG" ]]
+then
+  echo "file not found: $MOZCONFIG"
+  exit 1
+fi
+
+if [[ $clobber -eq 1 ]]
+then
+  rm -r "$MOZ_OBJDIR"
+  rm_result=$?
+  if [[ $rm_result -eq 0 ]]
+  then
+    echo "Build $buildtype clobbered, removed $MOZ_OBJDIR"
+  fi
+  exit $rm_result
+fi
+
+function the_end {
+  if [[ "$1" -eq 0 ]]
+  then
+    my_notification $1 "Firefox $2 $buildtype ready."
+  else
+    my_notification $1 "Firefox $2 $buildtype failed."
+  fi
+  echo "Timer: $SECONDS seconds."
+  exit $1
+}
+
+if [[ $configure -eq 1 ]]
+then
+  $MY_MAKE -f client.mk configure
+  the_end $? "configure"
+fi
+
+buildtimestamp="${SMARTMAKE_TIMESTAMP}-$buildtype"
+
+if [[ $use_smartmake -eq 1 ]]
+then
+  if [[ ! -f "$SMARTMAKE_CONFIG" ]]
+  then
+    echo "[smartmake]" > "$SMARTMAKE_CONFIG"
+    echo "cmd=$SMARTMAKE_CMD" >> "$SMARTMAKE_CONFIG"
+  fi
+  if [[ -f "$buildtimestamp" ]]
+  then
+    cp "$buildtimestamp" "$SMARTMAKE_TIMESTAMP"
+  fi
+  mozsmartmake.py
+  make_result=$?
+  cp "$SMARTMAKE_TIMESTAMP" "$buildtimestamp"
+else
+  $MY_MAKE -f client.mk build
+  make_result=$?
+  if [[ "$make_result" -eq 0 && -f "$SMARTMAKE_TIMESTAMP" ]]
+  then
+    if [[ "$MY_OS" == "Darwin" ]]
+    then
+      date -u > "$SMARTMAKE_TIMESTAMP"
+    else
+      date -u -R > "$SMARTMAKE_TIMESTAMP"
+    fi
+    cp "$SMARTMAKE_TIMESTAMP" "$buildtimestamp"
+  fi
+fi
+
+the_end $make_result "build"

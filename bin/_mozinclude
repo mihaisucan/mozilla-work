@@ -1,0 +1,56 @@
+#!/bin/bash
+
+MY_REPO_DIR=`hg root`
+if [[ -z "$MY_REPO_DIR" || ! -d "$MY_REPO_DIR" ]]
+then
+  echo "hg root did not return a valid result. Please cd into the Firefox mercurial repo."
+  if [[ -z "$DO_NOT_EXIT" ]]
+  then
+    exit 1
+  fi
+fi
+
+# tells the last folder name in the current path, this is the Mozilla
+# repository, eg. fx-team.
+MY_REPO_NAME="${MY_REPO_DIR##*/}"
+MY_OS="$(uname)"
+SMARTMAKE_CONFIG="$MY_REPO_DIR/.hg/.smartmake"
+SMARTMAKE_TIMESTAMP="$MY_REPO_DIR/.hg/.smartmake-timestamp"
+MY_NOTIFYSEND="notify-send"
+
+if [[ "$MY_OS" == "MINGW32_NT-6.1" ]]
+then
+  MY_MAKE="python build/pymake/make.py"
+else
+  MY_MAKE="make"
+fi
+
+SMARTMAKE_CMD="$MY_MAKE -s -j 12 -C"
+
+source "$MY_DIR/../config.local"
+
+function my_notification {
+  if [[ $1 -eq 0 ]]
+  then
+    $MY_NOTIFYSEND "$MY_SELF" "$2" -i "info" -u "low"
+  else
+    $MY_NOTIFYSEND "$MY_SELF" "$2" -i "error" -u "critical"
+  fi
+  echo "$2"
+}
+
+# thanks to http://stackoverflow.com/questions/2564634
+function relative_path {
+  source=$1
+  target=$2
+
+  common_part=$source
+  back=
+  while [ "${target#$common_part}" = "${target}" ]; do
+    common_part=$(dirname $common_part)
+    back="../${back}"
+  done
+
+  echo "${back}${target#$common_part/}"
+}
+

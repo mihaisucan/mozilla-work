@@ -1,7 +1,6 @@
+#!/bin/bash
 
-MY_SRC_DIR="${PWD##*/}"
 CFG_BUILD_CLANG=1
 CFG_BUILDS_DIR="$HOME/Public/builds/firefox"
-MY_OS="$(uname)"
 
 # vim:set ft=sh:
