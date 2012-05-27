@@ -49,6 +49,9 @@ then
   else
     cmd="Nightly.app/Contents/MacOS/firefox"
   fi
+elif [[ "$MY_OS" == "mswin" ]]
+then
+  cmd="bin/firefox.exe"
 else
   cmd="./bin/firefox"
 fi

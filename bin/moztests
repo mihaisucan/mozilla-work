@@ -86,8 +86,9 @@ then
 fi
 
 function run_self {
+  echo "$MY_SELF_ARGS $1"
   $MY_SELF_ARGS $1
-  self_result=$?
+  local self_result=$?
   if [[ $nofail -ne 1 && $self_result -ne 0 ]]
   then
     echo;
@@ -104,18 +105,39 @@ function subtests_end {
 }
 
 function run_test {
-  export TEST_PATH="$1"
-  currentcmd="$RUN_TEST_CMD -C $OBJ_DIR $MAKE_TARGET"
+  local _test="$1"
+
   echo;
-  echo "TEST_PATH=$TEST_PATH"
+
+  if [[ "$MAKE_TARGET" == "xpcshell-tests" ]]
+  then
+    if [[ -f "$MY_REPO_DIR/$_test" ]]
+    then
+      local src="$MY_REPO_DIR/$TEST_DIR/$XPCSHELL_SUBDIR"
+      local src="$(win2unix_path "$src")"
+      local dest="$MY_REPO_DIR/$_test"
+      local dest="$(win2unix_path "$dest")"
+      export SOLO_FILE="$(relative_path "$src" "$dest")"
+      echo "SOLO_FILE=$SOLO_FILE"
+      local currentcmd="$RUN_TEST_CMD -C $TEST_DIR check-one"
+    else
+      local currentcmd="$RUN_TEST_CMD -C $TEST_DIR $MAKE_TARGET"
+    fi
+  else
+    export TEST_PATH="$_test"
+    echo "TEST_PATH=$TEST_PATH"
+    local currentcmd="$RUN_TEST_CMD -C $OBJ_DIR $MAKE_TARGET"
+  fi
+
   echo "$currentcmd"
   echo;
+
   $currentcmd
-  cmd_result=$?
+  local cmd_result=$?
   if [[ $nofail -ne 1 && $cmd_result -ne 0 ]]
   then
     echo;
-    my_notification $cmd_result "$TEST_PATH test failed!"
+    my_notification $cmd_result "$_test test failed!"
     echo "Timer: $SECONDS seconds."
     exit 1
   fi
@@ -149,7 +171,7 @@ case "$TEST_SUITE" in
     then
       # this is a shortcut so I can run specific tests from the devtools
       # Scratchpad folder
-      run_self -devtools-scratchpad "$CUSTOM_TEST_FILE"
+      run_self "-devtools-scratchpad \"$CUSTOM_TEST_FILE\""
       exit $?
     fi
 
@@ -195,6 +217,7 @@ case "$TEST_SUITE" in
     ;;
   ( '-toolkit-debugger' )
     TEST_DIR="toolkit/devtools/debugger/tests"
+    XPCSHELL_SUBDIR="unit"
     MAKE_TARGET="xpcshell-tests"
     ;;
   ( '-jsdbg' | '-debugger' )
@@ -220,7 +243,7 @@ case "$TEST_SUITE" in
     ;;
   ( '-devtools' )
     # run all of the known devtools tests
-    run_self -sessionstore *scratchpad*js
+    run_self "-sessionstore *scratchpad*js"
     echo;
     run_self -consoleapi
     echo;
@@ -324,11 +347,23 @@ fi
 if [[ -d "$TEST_DIR" && ! -z "$FILE_FILTER" ]]
 then
   # use the files filter
-  cd "$TEST_DIR"
+  if [[ "$MAKE_TARGET" == "xpcshell-tests" ]]
+  then
+    FILES_FOLDER="$TEST_DIR/$XPCSHELL_SUBDIR"
+  else
+    FILES_FOLDER="$TEST_DIR"
+  fi
+
+  cd "$FILES_FOLDER"
 
   FILES=($FILE_FILTER)
 
-  cd "$MY_REPO_DIR"
+  if [[ "$MAKE_TARGET" == "xpcshell-tests" ]]
+  then
+    cd "$OBJ_DIR"
+  else
+    cd "$MY_REPO_DIR"
+  fi
 
   echo;
   echo "Files matched: ${FILES[@]}"
@@ -337,26 +372,30 @@ then
   found=0
   for t in "${FILES[@]}"
   do
-    if [[ ! -f "${TEST_DIR}/$t" || "$t" =~ ^\. || "$t" =~ ~$ || "$t" =~ \.bak$ ]]
+    if [[ ! -f "$MY_REPO_DIR/$FILES_FOLDER/$t" || "$t" =~ ^\. || "$t" =~ ~$ || "$t" =~ \.bak$ ]]
     then
       continue
     fi
 
     found=1
-    run_test "${TEST_DIR}/$t"
+    run_test "$FILES_FOLDER/$t"
   done
 
   if [[ "$found" -eq 0 ]]
   then
-    echo "no files match $FILE_FILTER in $TEST_DIR"
+    echo "no files match $FILE_FILTER in $FILES_FOLDER"
     exit 1
   fi
 
   echo;
-  echo "$TEST_SUITE $TEST_DIR ${FILE_FILTER}: It took $SECONDS seconds for the tests to run."
+  echo "$TEST_SUITE $FILES_FOLDER ${FILE_FILTER}: It took $SECONDS seconds for the tests to run."
   exit 0
 
 else
+  if [[ "$MAKE_TARGET" == "xpcshell-tests" ]]
+  then
+    cd "$OBJ_DIR"
+  fi
   run_test "$TEST_DIR"
 
   echo;

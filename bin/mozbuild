@@ -82,7 +82,7 @@ else
   buildtype="opt"
 fi
 
-export MOZ_OBJDIR="$CFG_BUILDS_DIR/$MY_REPO_NAME/$buildtype"
+export MOZ_OBJDIR="${CFG_BUILDS_DIR}/${MY_REPO_NAME}/${buildtype}"
 export MOZCONFIG="$MY_DIR/../mozconfig/$buildtype"
 
 if [[ ! -f "$MOZCONFIG" ]]
@@ -112,6 +112,11 @@ function the_end {
   echo "Timer: $SECONDS seconds."
   exit $1
 }
+
+if [[ "$MY_OS" == "mswin" ]]
+then
+  export MOZ_OBJDIR="$(unix2win_path "$MOZ_OBJDIR")"
+fi
 
 if [[ $configure -eq 1 ]]
 then

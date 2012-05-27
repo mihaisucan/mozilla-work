@@ -10,17 +10,30 @@ then
   fi
 fi
 
+PATH_SEP="/"
+MY_OS="$(uname)"
+if [[ "$MY_OS" == "MINGW32_NT-6.1" ]]
+then
+  MY_OS="mswin"
+  PATH_SEP="\\"
+fi
+
 # tells the last folder name in the current path, this is the Mozilla
 # repository, eg. fx-team.
-MY_REPO_NAME="${MY_REPO_DIR##*/}"
-MY_OS="$(uname)"
+if [[ "$MY_OS" == "mswin" ]]
+then
+  MY_REPO_NAME="${MY_REPO_DIR//\\//}"
+else
+  MY_REPO_NAME="$MY_REPO_DIR"
+fi
+MY_REPO_NAME="${MY_REPO_NAME##*/}"
 SMARTMAKE_CONFIG="$MY_REPO_DIR/.hg/.smartmake"
 SMARTMAKE_TIMESTAMP="$MY_REPO_DIR/.hg/.smartmake-timestamp"
 MY_NOTIFYSEND="notify-send"
 
-if [[ "$MY_OS" == "MINGW32_NT-6.1" ]]
+if [[ "$MY_OS" == "mswin" ]]
 then
-  MY_MAKE="python build/pymake/make.py"
+  MY_MAKE="python $MY_REPO_DIR/build/pymake/make.py"
 else
   MY_MAKE="make"
 fi
@@ -53,4 +66,15 @@ function relative_path {
 
   echo "${back}${target#$common_part/}"
 }
+
+function win2unix_path {
+  unixpath="${1//\\//}"
+  echo "${unixpath/c:\///c/}"
+}
+
+function unix2win_path {
+  #winpath="${1//\//\\}"
+  echo "${1/\/c\//c:/}"
+}
+
 
