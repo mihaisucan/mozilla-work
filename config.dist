@@ -2,5 +2,6 @@
 
 CFG_BUILD_CLANG=1
 CFG_BUILDS_DIR="$HOME/Public/builds/firefox"
+export ORION_CLIENT_HOME="$HOME/src/eclipse/orion.client"
 
 # vim:set ft=sh:

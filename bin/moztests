@@ -241,6 +241,10 @@ case "$TEST_SUITE" in
     TEST_DIR="browser/devtools/shared/test"
     MAKE_TARGET="mochitest-browser-chrome"
     ;;
+  ( '-gcli' | '-cmdline' | '-commandline' )
+    TEST_DIR="browser/devtools/commandline/test"
+    MAKE_TARGET="mochitest-browser-chrome"
+    ;;
   ( '-devtools' )
     # run all of the known devtools tests
     run_self "-sessionstore *scratchpad*js"

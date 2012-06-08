@@ -38,8 +38,14 @@ done
 if [[ "$both" -eq 1 ]]
 then
   $MY_SELF $argslist
+  if [[ "$?" -ne 0 ]]
+  then
+    exit $?
+  fi
   $MY_SELF -dbg $argslist
-  exit $?
+  dbgresult="$?"
+  echo "Total time: $SECONDS seconds"
+  exit $dbgresult
 fi
 
 if [[ ! -d "$CFG_BUILDS_DIR" ]]
