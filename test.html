@@ -28,6 +28,15 @@
       #editable:focus {
         border: 2px solid red;
       }
+      #menu p {
+        display: none;
+        position: absolute;
+        width: 300px;
+        height: 300px;
+        background: yellow;
+        margin: 0;
+      }
+      #menu:hover p { display: block }
     </style>
     <link rel=stylesheet href="test-unmatched.css">
   </head>
@@ -51,6 +60,15 @@
     <script type="text/javascript"><!--
       //window.console = {};
       //window.console.error = function() { alert("lol") };
+
+      function $(param) {
+        console.log("$('" + param + "') was called");
+      }
+
+      $.foobar = 'omg';
+      $.zuzu = 'boom';
+      $.duron = { opteron: "amd", athlon: "amd", core2duo: "intel", nehalem:
+        "intel" };
 
       (function () {
         bigDeal = "lolz";
@@ -343,12 +361,98 @@ window.addEventListener("load", function _onload() {
     document.body.addEventListener("click", myOnClick, true);
     document.body.addEventListener("contextmenu", myOnContextMenu, true);
 }, false);
+</script>
 
+<script type="application/javascript">
+var perf_loops = 1000;
+var perf_click = 0;
+
+// from bug 722685 - thanks Kevin!
+function perfSimpleConsoleAPI() {
+  //console.log("perf_click", perf_click++);
+  //var dumpTime = runDumpPerfTest();
+  var dumpTime = 0;
+  var start = new Date().getTime();
+  var simple = runSimplePerfTest();
+  //var interpolation = runInterpolationPerfTest();
+  var interpolation = 0;
+  var end = new Date().getTime();
+  var elem = document.getElementById("consoleperf-results");
+  elem.innerHTML = "Dump simple string: " + dumpTime + "<br>\n" +
+    "Simple string: " + simple + "<br>\n" +
+    "Interpolated string: " + interpolation + "<br>\n" +
+    "Total: " + (end - start);
+}
+
+function runDumpPerfTest() {
+  var start = new Date().getTime();
+  for (var i = 0; i < perf_loops; i++) {
+    dump("Simple string " + i + "\n");
+  }
+  var end = new Date().getTime();
+  return end - start;
+}
+
+function runSimplePerfTest() {
+  var start = new Date().getTime();
+  for (var i = 0; i < perf_loops; i++) {
+    console.log("Simple string " + i);
+  }
+  var end = new Date().getTime();
+  return end - start;
+}
+
+function runInterpolationPerfTest() {
+  var start = new Date().getTime();
+  for (var i = 0; i < perf_loops; i++) {
+    console.log("Interpolated string %s", i);
+  }
+  var end = new Date().getTime();
+  return end - start;
+}
+
+function perfObjectConsoleAPI() {
+  //console.log("perf_click", perf_click++);
+  var start = new Date().getTime();
+  for (var i = 0; i < perf_loops; i++) {
+    var obj = {time: new Date().getTime(), index: i};
+    console.dir(obj);
+  }
+  var end = new Date().getTime();
+  var elem = document.getElementById("consoleperf-results");
+  elem.innerHTML = "console.log with objects: " + (end - start);
+}
+
+function perfScriptErrors() {
+  var iframe = document.createElement("iframe");
+  iframe.style.display = "none";
+  document.body.appendChild(iframe);
+  var doc = iframe.contentWindow.document;
+  console.time("script errors");
+  var start = new Date().getTime();
+  for (var i = 0; i < perf_loops; i++) {
+    doc.writeln("<script> window.perfTest" + i + "(); <" + "/script>");
+  }
+  var end = new Date().getTime();
+  console.timeEnd("script errors");
+  var elem = document.getElementById("consoleperf-results");
+  elem.innerHTML = "script errors: " + (end - start) + "ms";
+  doc.close();
+  setTimeout(function() {
+      document.body.removeChild(iframe);
+  }, 2000);
+}
 </script>
     <script type="application/javascript;version=1.7" src="test.js"></script>
     <img src="lolz.png">
     <div id="iframesplaceholder" style="display:inline"></div>
-    <p><button onclick="scrollTest()">scroll test</button> <button onclick="myEventHandler(event, true)">debug!</button></p>
+    <p><button onclick="scrollTest()">scroll test</button>
+    <button onclick="myEventHandler(event, true)">debug!</button>
+    <button onclick="perfSimpleConsoleAPI()">perf test: simple console API</button>
+    <button onclick="perfObjectConsoleAPI()">perf test: console API with object</button></p>
+    <button onclick="perfScriptErrors()">perf test: script errors</button></p>
+    <p id="consoleperf-results"></p>
+    <div id="menu">menu<p>submenu</p></div>
     <div style="border: 1px red solid" id="bigarea">big area</div>
     <p>booo</p>
     <div id="editable">
