@@ -14,6 +14,7 @@ gdb=0
 dbg=0
 xvfb=0
 nofail=0
+REPEAT_RUNS=1
 argslist=""
 
 # ugly arguments parsing
@@ -38,7 +39,13 @@ for i do
       argslist="$i $argslist"
       ;;
     ('-target')
+      oldexpected="$expected"
       expected="target"
+      ;;
+    ('-n')
+      oldexpected="$expected"
+      expected="repeats"
+      argslist="$i $argslist"
       ;;
     ('-'*)
       TEST_SUITE="$i"
@@ -54,14 +61,14 @@ for i do
           CUSTOM_TEST_FILE="$i"
           expected="nothing"
           ;;
+        ('repeats')
+          REPEAT_RUNS="$i"
+          expected="$oldexpected"
+          argslist="$argslist $i"
+          ;;
         ('target')
           CUSTOM_MAKE_TARGET="$i"
-          if [[ ! -z "$CUSTOM_TEST_DIR" || ! -z "$TEST_SUITE" ]]
-          then
-            expected="file"
-          else
-            expected="dir"
-          fi
+          expected="$oldexpected"
           ;;
       esac
       ;;
@@ -132,15 +139,22 @@ function run_test {
   echo "$currentcmd"
   echo;
 
-  $currentcmd
-  local cmd_result=$?
-  if [[ $nofail -ne 1 && $cmd_result -ne 0 ]]
-  then
+  for ((n=0; n<REPEAT_RUNS; n++))
+  do
     echo;
-    my_notification $cmd_result "$_test test failed!"
-    echo "Timer: $SECONDS seconds."
-    exit 1
-  fi
+    echo "Run #${n}:"
+    echo;
+    echo;
+    $currentcmd
+    local cmd_result=$?
+    if [[ $nofail -ne 1 && $cmd_result -ne 0 ]]
+    then
+      echo;
+      my_notification $cmd_result "$_test test failed!"
+      echo "Timer: $SECONDS seconds."
+      exit 1
+    fi
+  done
 }
 
 # default make target
