@@ -12,6 +12,8 @@ configure=0
 both=0
 argslist=""
 use_smartmake=0
+b2g=0
+
 for i do
   case $i in
     ('-dbg')
@@ -31,6 +33,10 @@ for i do
       ;;
     ('-both')
       both=1
+      ;;
+    ('-b2g')
+      b2g=1
+      argslist="$i $argslist"
       ;;
   esac
 done
@@ -88,7 +94,14 @@ else
   buildtype="opt"
 fi
 
-export MOZ_OBJDIR="${CFG_BUILDS_DIR}/${MY_REPO_NAME}/${buildtype}"
+if [[ $b2g -eq 1 ]]
+then
+  export MY_MOZ_APP="b2g"
+else
+  export MY_MOZ_APP="browser"
+fi
+
+export MOZ_OBJDIR="${CFG_BUILDS_DIR}/${MY_REPO_NAME}/${MY_MOZ_APP}-${buildtype}"
 export MOZCONFIG="$MY_DIR/../mozconfig/$buildtype"
 
 if [[ ! -f "$MOZCONFIG" ]]
@@ -130,7 +143,7 @@ then
   the_end $? "configure"
 fi
 
-buildtimestamp="${SMARTMAKE_TIMESTAMP}-$buildtype"
+buildtimestamp="${SMARTMAKE_TIMESTAMP}-${MY_MOZ_APP}-$buildtype"
 
 if [[ $use_smartmake -eq 1 ]]
 then

@@ -79,11 +79,13 @@ MY_SELF_ARGS="$MY_SELF $argslist"
 
 cd "$MY_REPO_DIR"
 
+app="browser"
+
 if [[ $dbg -eq 1 ]]
 then
-  OBJ_DIR="$CFG_BUILDS_DIR/$MY_REPO_NAME/dbg"
+  OBJ_DIR="$CFG_BUILDS_DIR/$MY_REPO_NAME/$app-dbg"
 else
-  OBJ_DIR="$CFG_BUILDS_DIR/$MY_REPO_NAME/opt"
+  OBJ_DIR="$CFG_BUILDS_DIR/$MY_REPO_NAME/$app-opt"
 fi
 
 if [[ ! -d "$OBJ_DIR" ]]
@@ -162,8 +164,20 @@ MAKE_TARGET="mochitest-browser-chrome"
 
 case "$TEST_SUITE" in
   ( '-hud' | '-webconsole' | '-hudservice' )
+    # run the all of the web console tests
+    run_self -toolkit-webconsole
+    echo;
+    run_self -browser-webconsole
+
+    subtests_end
+    ;;
+  ( '-browser-webconsole' )
     TEST_DIR="browser/devtools/webconsole/test"
     MAKE_TARGET="mochitest-browser-chrome"
+    ;;
+  ( '-toolkit-webconsole' )
+    TEST_DIR="toolkit/devtools/webconsole/test"
+    MAKE_TARGET="mochitest-plain"
     ;;
   ( '-consoleapi' )
     run_self -dom-browser
@@ -225,7 +239,7 @@ case "$TEST_SUITE" in
     TEST_DIR="browser/devtools/tilt/test"
     MAKE_TARGET="mochitest-browser-chrome"
     ;;
-  ( '-browser-debugger' )
+  ( '-browser-debugger' | '-browser-dbg' | '-browser-jsdbg' )
     TEST_DIR="browser/devtools/debugger/test"
     MAKE_TARGET="mochitest-browser-chrome"
     ;;
@@ -299,6 +313,11 @@ case "$TEST_SUITE" in
   ( '-dom-mochitest-general' )
     TEST_DIR="dom/tests/mochitest/general"
     MAKE_TARGET="mochitest-plain"
+    ;;
+  ( -* )
+    echo "Unknown test suite: $TEST_SUITE"
+    echo;
+    exit 1
     ;;
 esac
 

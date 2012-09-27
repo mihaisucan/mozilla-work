@@ -7,6 +7,7 @@ source "$MY_DIR/_mozinclude"
 
 gdb=n
 dbg=n
+b2g=n
 
 for i do
   case $i in
@@ -17,6 +18,9 @@ for i do
     ('-dbg')
       dbg=y
       ;;
+    ('-b2g')
+      b2g=y
+      ;;
   esac
 done
 
@@ -26,11 +30,18 @@ then
   exit 1
 fi
 
+if [[ "$b2g" == "y" ]]
+then
+  app="b2g"
+else
+  app="browser"
+fi
+
 if [[ "$dbg" == "y" ]]
 then
-  ffdir="$CFG_BUILDS_DIR/$MY_REPO_NAME/dbg/dist"
+  ffdir="$CFG_BUILDS_DIR/$MY_REPO_NAME/$app-dbg/dist"
 else
-  ffdir="$CFG_BUILDS_DIR/$MY_REPO_NAME/opt/dist"
+  ffdir="$CFG_BUILDS_DIR/$MY_REPO_NAME/$app-opt/dist"
 fi
 
 if [[ ! -d "$ffdir" ]]
@@ -63,7 +74,20 @@ then
   cmd="$cmd -g"
 fi
 
-cmd="$cmd -P mozilla-central -purgecaches"
+profile="-P mozilla-central"
+
+if [[ "$b2g" == "y" ]]
+then
+  profile="-profile $CFG_GAIA_PROFILE"
+  export DEBUG=1
+fi
+
+cmd="$cmd $profile -purgecaches"
+
+if [[ "$b2g" == "y" ]]
+then
+  cmd="$cmd http://system.gaiamobile.org:8080"
+fi
 
 echo "$cmd";
 echo;
