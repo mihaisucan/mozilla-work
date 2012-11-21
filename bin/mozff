@@ -52,19 +52,29 @@ fi
 
 cd "$ffdir"
 
-if [[ "$MY_OS" == "Darwin" ]]
+if [[ "$b2g" == "y" ]]
 then
-  if [[ "$dbg" == "y" ]]
+  if [[ "$MY_OS" == "Darwin" ]]
   then
-    cmd="NightlyDebug.app/Contents/MacOS/firefox"
+    cmd="B2G.app/Contents/MacOS/b2g"
   else
-    cmd="Nightly.app/Contents/MacOS/firefox"
+    cmd="./bin/b2g"
   fi
-elif [[ "$MY_OS" == "mswin" ]]
-then
-  cmd="bin/firefox.exe"
 else
-  cmd="./bin/firefox"
+  if [[ "$MY_OS" == "Darwin" ]]
+  then
+    if [[ "$dbg" == "y" ]]
+    then
+      cmd="NightlyDebug.app/Contents/MacOS/firefox"
+    else
+      cmd="Nightly.app/Contents/MacOS/firefox"
+    fi
+  elif [[ "$MY_OS" == "mswin" ]]
+  then
+    cmd="bin/firefox.exe"
+  else
+    cmd="./bin/firefox"
+  fi
 fi
 
 cmd="$cmd -no-remote"
@@ -86,7 +96,7 @@ cmd="$cmd $profile -purgecaches"
 
 if [[ "$b2g" == "y" ]]
 then
-  cmd="$cmd http://system.gaiamobile.org:8080"
+  cmd="$cmd -jsconsole http://system.gaiamobile.org:8080"
 fi
 
 echo "$cmd";

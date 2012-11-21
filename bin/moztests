@@ -138,14 +138,16 @@ function run_test {
     local currentcmd="$RUN_TEST_CMD -C $OBJ_DIR $MAKE_TARGET"
   fi
 
-  echo "$currentcmd"
-  echo;
-
   for ((n=0; n<REPEAT_RUNS; n++))
   do
+    if [[ "$n" > 0 && "$xvfb" == 1 ]]
+    then
+      sleep 1s
+    fi
+
     echo;
     echo "Run #${n}:"
-    echo;
+    echo "$currentcmd"
     echo;
     $currentcmd
     local cmd_result=$?
@@ -177,7 +179,7 @@ case "$TEST_SUITE" in
     ;;
   ( '-toolkit-webconsole' )
     TEST_DIR="toolkit/devtools/webconsole/test"
-    MAKE_TARGET="mochitest-plain"
+    MAKE_TARGET="mochitest-chrome"
     ;;
   ( '-consoleapi' )
     run_self -dom-browser
@@ -312,6 +314,10 @@ case "$TEST_SUITE" in
     ;;
   ( '-dom-mochitest-general' )
     TEST_DIR="dom/tests/mochitest/general"
+    MAKE_TARGET="mochitest-plain"
+    ;;
+  ( '-dom-plugins' )
+    TEST_DIR="dom/plugins/test"
     MAKE_TARGET="mochitest-plain"
     ;;
   ( -* )
