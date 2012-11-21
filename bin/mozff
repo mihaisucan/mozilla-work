@@ -9,6 +9,11 @@ gdb=n
 dbg=n
 b2g=n
 
+
+# ugly arguments parsing
+_expected="..."
+profile_name="$MY_REPO_NAME"
+profile_temporary=n
 for i do
   case $i in
     ('-gdb')
@@ -20,6 +25,17 @@ for i do
       ;;
     ('-b2g')
       b2g=y
+      ;;
+    ('-profile' | '-p')
+      _expected="profile"
+      ;;
+    ( * )
+      case $_expected in
+        ( 'profile' )
+          profile_name="$i"
+          _expected="..."
+          ;;
+      esac
       ;;
   esac
 done
@@ -84,15 +100,31 @@ then
   cmd="$cmd -g"
 fi
 
-profile="-P mozilla-central"
+if [[ ! -d "$CFG_PROFILE_DIR" ]]
+then
+  echo "Folder not found: $CFG_PROFILE_DIR"
+  exit 1
+fi
+
+if [[ "$profile_name" == "tmp" ]]
+then
+  profile_name="tmp-$(date +'%s')"
+  profile_temporary=y
+fi
 
 if [[ "$b2g" == "y" ]]
 then
-  profile="-profile $CFG_GAIA_PROFILE"
+  profile_path="$CFG_GAIA_PROFILE"
   export DEBUG=1
+else
+  profile_path="$CFG_PROFILE_DIR/$profile_name"
+  if [[ ! -d "$profile_path" ]]
+  then
+    mkdir "$profile_path"
+  fi
 fi
 
-cmd="$cmd $profile -purgecaches"
+cmd="$cmd -profile $profile_path -purgecaches"
 
 if [[ "$b2g" == "y" ]]
 then
@@ -103,3 +135,9 @@ echo "$cmd";
 echo;
 $cmd
 echo "Firefox ran for $SECONDS seconds."
+
+if [[ "$profile_temporary" == "y" ]]
+then
+  rm -r "$profile_path"
+fi
+
