@@ -14,6 +14,7 @@ b2g=n
 _expected="..."
 profile_name="$MY_REPO_NAME"
 profile_temporary=n
+safe_mode=n
 for i do
   case $i in
     ('-gdb')
@@ -28,6 +29,9 @@ for i do
       ;;
     ('-profile' | '-p')
       _expected="profile"
+      ;;
+    ('-safe-mode')
+      safe_mode=y
       ;;
     ( * )
       case $_expected in
@@ -126,6 +130,11 @@ fi
 
 cmd="$cmd -profile $profile_path -purgecaches"
 
+if [[ "$safe_mode" == "y" ]]
+then
+  cmd="$cmd -safe-mode"
+fi
+
 if [[ "$b2g" == "y" ]]
 then
   cmd="$cmd -jsconsole http://system.gaiamobile.org:8080"
@@ -139,5 +148,6 @@ echo "Firefox ran for $SECONDS seconds."
 if [[ "$profile_temporary" == "y" ]]
 then
   rm -r "$profile_path"
+  echo "Removed temporary profile: $profile_path"
 fi
 

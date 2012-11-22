@@ -271,8 +271,24 @@ case "$TEST_SUITE" in
     TEST_DIR="browser/devtools/shared/test"
     MAKE_TARGET="mochitest-browser-chrome"
     ;;
+  ( '-devtools-framework' )
+    TEST_DIR="browser/devtools/framework/test"
+    MAKE_TARGET="mochitest-browser-chrome"
+    ;;
   ( '-gcli' | '-cmdline' | '-commandline' )
     TEST_DIR="browser/devtools/commandline/test"
+    MAKE_TARGET="mochitest-browser-chrome"
+    ;;
+  ( '-layoutview' )
+    TEST_DIR="browser/devtools/layoutview/test"
+    MAKE_TARGET="mochitest-browser-chrome"
+    ;;
+  ( '-markupview' )
+    TEST_DIR="browser/devtools/markupview/test"
+    MAKE_TARGET="mochitest-browser-chrome"
+    ;;
+  ( '-responsivedesign' | '-rd' )
+    TEST_DIR="browser/devtools/responsivedesign/test"
     MAKE_TARGET="mochitest-browser-chrome"
     ;;
   ( '-devtools' )
