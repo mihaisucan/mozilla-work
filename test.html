@@ -55,7 +55,7 @@
     <button onclick="doMyXHR()">do XHR</button>
     <button onclick="console.clear()">clear</button>
     <button onclick="console.group('foo')">group</button>
-    <button onclick="console.groupEnd('foo')">groupEnd</button>
+    <button onclick="console.groupEnd('foo', window, document)">groupEnd</button>
 
     <script type="text/javascript"><!--
       //window.console = {};
@@ -65,10 +65,18 @@
         console.log("$('" + param + "') was called");
       }
 
-      $.foobar = 'omg';
-      $.zuzu = 'boom';
-      $.duron = { opteron: "amd", athlon: "amd", core2duo: "intel", nehalem:
-        "intel" };
+      if (window.$) {
+        $.foobar = 'omg';
+        $.zuzu = 'boom';
+        $.duron = { opteron: "amd", athlon: "amd", core2duo: "intel", nehalem:
+          "intel" };
+
+        Object.defineProperty($, "getterAndSetter", {
+          enumerable: true,
+          get: function fooGet() { return "foo"; },
+          set: function fooSet() { 1+2 },
+        });
+      }
 
       (function () {
         bigDeal = "lolz";

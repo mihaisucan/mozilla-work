@@ -3,10 +3,12 @@
 
 
 if (@$_GET['test'] == "cookies") {
+  header("Very-Long-Header: " . str_repeat("foo baz", 1000));
   setcookie("cookie1", "omg lolz <p>kiss me");
   setcookie("co%3akie", "omg=lolz<\<'\"");
   setcookie("lastupdate", date("c"));
   setcookie("testParams", "omglolz", time() + 60*60, "/~robod/", ".localhost", false, true);
+  setcookie("veryLong", str_repeat("ab ba", 1000));
   echo "<p>cookies!";
 } else if (@$_GET['test'] == "header301") {
   header('HTTP/1.1 301 Moved Permanently');
