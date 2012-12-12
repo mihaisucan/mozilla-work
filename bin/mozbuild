@@ -195,6 +195,7 @@ fi
 if [[ $fennec -eq 1 && $make_result -eq 0 ]]
 then
   $MY_MAKE -C "$MOZ_OBJDIR" package
+  make_result=$?
 fi
 
 the_end $make_result "build"
