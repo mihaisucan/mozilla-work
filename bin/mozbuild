@@ -13,6 +13,7 @@ both=0
 argslist=""
 use_smartmake=0
 b2g=0
+fennec=0
 
 for i do
   case $i in
@@ -36,6 +37,10 @@ for i do
       ;;
     ('-b2g')
       b2g=1
+      argslist="$i $argslist"
+      ;;
+    ('-fennec')
+      fennec=1
       argslist="$i $argslist"
       ;;
   esac
@@ -97,12 +102,25 @@ fi
 if [[ $b2g -eq 1 ]]
 then
   export MY_MOZ_APP="b2g"
+elif [[ $fennec -eq 1 ]]
+then
+  export MY_MOZ_APP="mobile/android"
 else
   export MY_MOZ_APP="browser"
 fi
 
-export MOZ_OBJDIR="${CFG_BUILDS_DIR}/${MY_REPO_NAME}/${MY_MOZ_APP}-${buildtype}"
-export MOZCONFIG="$MY_DIR/../mozconfig/$buildtype"
+mozapp="${MY_MOZ_APP/\//-}"
+export MOZ_OBJDIR="${CFG_BUILDS_DIR}/${MY_REPO_NAME}/${mozapp}-${buildtype}"
+
+export MY_MOZCONFIG_COMMON="$MY_DIR/../mozconfig/common"
+
+if [[ $fennec -eq 1 ]]
+then
+  export MOZCONFIG="$MY_DIR/../mozconfig/fennec"
+  export MY_MOZCONFIG_INCLUDE="$MY_DIR/../mozconfig/$buildtype"
+else
+  export MOZCONFIG="$MY_DIR/../mozconfig/$buildtype"
+fi
 
 if [[ ! -f "$MOZCONFIG" ]]
 then
@@ -124,9 +142,9 @@ fi
 function the_end {
   if [[ "$1" -eq 0 ]]
   then
-    my_notification $1 "Firefox $2 $buildtype ready."
+    my_notification $1 "${MY_REPO_NAME}: $mozapp $buildtype $2 ready."
   else
-    my_notification $1 "Firefox $2 $buildtype failed."
+    my_notification $1 "${MY_REPO_NAME}: $mozapp $buildtype $2 failed."
   fi
   echo "Timer: $SECONDS seconds."
   exit $1
@@ -143,7 +161,7 @@ then
   the_end $? "configure"
 fi
 
-buildtimestamp="${SMARTMAKE_TIMESTAMP}-${MY_MOZ_APP}-$buildtype"
+buildtimestamp="${SMARTMAKE_TIMESTAMP}-${mozapp}-$buildtype"
 
 if [[ $use_smartmake -eq 1 ]]
 then
@@ -172,6 +190,11 @@ else
     fi
     cp "$SMARTMAKE_TIMESTAMP" "$buildtimestamp"
   fi
+fi
+
+if [[ $fennec -eq 1 && $make_result -eq 0 ]]
+then
+  $MY_MAKE -C "$MOZ_OBJDIR" package
 fi
 
 the_end $make_result "build"

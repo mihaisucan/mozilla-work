@@ -1,0 +1,8 @@
+. $MY_MOZCONFIG_INCLUDE
+
+ac_add_options --with-android-ndk="$CFG_ANDROID_NDK"
+ac_add_options --with-android-sdk="$CFG_ANDROID_SDK"
+ac_add_options --with-android-toolchain="$CFG_ANDROID_TOOLCHAIN"
+ac_add_options --with-android-version=5
+ac_add_options --target=arm-linux-androideabi
+ac_add_options --disable-crashreporter
