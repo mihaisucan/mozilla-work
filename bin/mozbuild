@@ -14,6 +14,8 @@ argslist=""
 use_smartmake=0
 b2g=0
 fennec=0
+do_install=0
+do_package=0
 
 for i do
   case $i in
@@ -41,6 +43,14 @@ for i do
       ;;
     ('-fennec')
       fennec=1
+      argslist="$i $argslist"
+      ;;
+    ('-install')
+      do_install=1
+      argslist="$i $argslist"
+      ;;
+    ('-package')
+      do_package=1
       argslist="$i $argslist"
       ;;
   esac
@@ -161,6 +171,20 @@ then
   the_end $? "configure"
 fi
 
+
+if [[ $fennec -eq 1 && $do_package -eq 1 ]]
+then
+  $MY_MAKE -C "$MOZ_OBJDIR" package
+  the_end $? "package"
+fi
+
+if [[ $fennec -eq 1 && $do_install -eq 1 ]]
+then
+  $MY_ADB uninstall "org.mozilla.fennec_$USER"
+  $MY_ADB install -r "$MOZ_OBJDIR"/dist/fennec-*.apk
+  the_end $? "install"
+fi
+
 buildtimestamp="${SMARTMAKE_TIMESTAMP}-${mozapp}-$buildtype"
 
 if [[ $use_smartmake -eq 1 ]]
@@ -194,8 +218,13 @@ fi
 
 if [[ $fennec -eq 1 && $make_result -eq 0 ]]
 then
-  $MY_MAKE -C "$MOZ_OBJDIR" package
+  $MY_SELF -fennec -package
   make_result=$?
+  if [[ $make_result -eq 0 ]]
+  then
+    $MY_SELF -fennec -install
+    make_result=$?
+  fi
 fi
 
 the_end $make_result "build"

@@ -7,7 +7,7 @@ CFG_PROFILE_DIR="$HOME/.mozilla/dev-profiles"
 export ORION_CLIENT_HOME="$HOME/src/eclipse/orion.client"
 export MOZ_QUIET=1
 export CFG_ANDROID_NDK="$HOME/bin/android/android-ndk-r8b"
-export CFG_ANDROID_SDK="$HOME/bin/android/android-sdk-linux/platforms/android-16"
+export CFG_ANDROID_SDK="$HOME/bin/android/android-sdk-linux"
 export CFG_ANDROID_TOOLCHAIN="$CFG_ANDROID_NDK/toolchains/arm-linux-androideabi-4.6/prebuilt/linux-x86"
 
 # vim:set ft=sh:

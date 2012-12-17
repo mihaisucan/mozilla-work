@@ -38,6 +38,7 @@ MY_REPO_NAME="${MY_REPO_NAME##*/}"
 SMARTMAKE_CONFIG="$MY_REPO_DIR/$MY_REPO_TYPE/.smartmake"
 SMARTMAKE_TIMESTAMP="$MY_REPO_DIR/$MY_REPO_TYPE/.smartmake-timestamp"
 MY_NOTIFYSEND="notify-send"
+MY_ADB="$CFG_ANDROID_SDK/platform-tools/adb"
 
 if [[ "$MY_OS" == "mswin" ]]
 then
