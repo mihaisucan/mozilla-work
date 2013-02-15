@@ -4,7 +4,9 @@
 
 if (@$_GET['test'] == "cookies") {
   header("Very-Long-Header: " . str_repeat("foo baz", 1000));
-  setcookie("cookie1", "omg lolz <p>kiss me");
+  header("Set-Cookie: special=specialvalue=specialresult");
+  setcookie("cookie1", "omg \n \r \t \v \b \c lolz <p>kiss me");
+  setcookie("cookie3", "foo=bar");
   setcookie("co%3akie", "omg=lolz<\<'\"");
   setcookie("lastupdate", date("c"));
   setcookie("testParams", "omglolz", time() + 60*60, "/~robod/", ".localhost", false, true);

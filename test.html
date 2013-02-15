@@ -101,11 +101,11 @@
             ev.preventBubble();
           }
           try {
-            foo.bar.intern();
+            foobarObject.intern();
           } catch (ex) {
             window.lastException = ex;
           }
-          foo.bar.intern();
+          foobarObject.intern(document.body);
         }, false);
 
         var btnConsoleAPI = document.querySelector("#consoleAPI");
@@ -129,6 +129,9 @@
           if (dbg) {
             debugger;
           }
+
+          console.log("foo repeat");console.log("foo repeat");
+          console.log("foo repeat");console.error("foo repeat");
 
           var result = console.log("log", ev.type, ev);
           console.__returnValue__ = 'test';
@@ -380,13 +383,17 @@ function perfSimpleConsoleAPI() {
   //console.log("perf_click", perf_click++);
   //var dumpTime = runDumpPerfTest();
   var dumpTime = 0;
+  console.time("perf test");
   var start = new Date().getTime();
+  var startDate = new Date();
   var simple = runSimplePerfTest();
   //var interpolation = runInterpolationPerfTest();
   var interpolation = 0;
   var end = new Date().getTime();
+  console.timeEnd("perf test");
   var elem = document.getElementById("consoleperf-results");
-  elem.innerHTML = "Dump simple string: " + dumpTime + "<br>\n" +
+  elem.innerHTML = "Start time: " + startDate + "<br>\n" +
+    "Dump simple string: " + dumpTime + "<br>\n" +
     "Simple string: " + simple + "<br>\n" +
     "Interpolated string: " + interpolation + "<br>\n" +
     "Total: " + (end - start);
@@ -450,6 +457,11 @@ function perfScriptErrors() {
       document.body.removeChild(iframe);
   }, 2000);
 }
+</script>
+<script type="application/javascript;version=1.8">
+  "use strict";
+  testUnassigned = "lolz";
+  console.log("foobaraaaaaaa!!!!!!!!!!!!!!!!");
 </script>
     <script type="application/javascript;version=1.7" src="test.js"></script>
     <img src="lolz.png">

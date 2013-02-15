@@ -27,7 +27,7 @@
       onclick="removeIframe()">remove iframe</button> <button 
       onclick="addImages()">add images</button> <button 
       onclick="panelRefreshTest()">panel refresh test</button> <button 
-      onclick="generateError()">generate error</button></p>
+      onclick="generateError(event)">generate error</button></p>
 
     <div id="container">
       <div id="comment"><!-- highly informative comment --></div>
@@ -174,9 +174,11 @@
         addIframe();
       }
 
-      function generateError() {
-        console.log("console log");
+      function generateError(ev) {
+        console.log("console log", window, ev);
         console.error("console error");
+        console.trace();
+        console.dir(document);
         foobaz.bar();
       }
     // --></script>
