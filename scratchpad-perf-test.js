@@ -1,3 +1,5 @@
+// -sp-context: browser
+
 let HUDService = Cu.import("resource:///modules/HUDService.jsm", {}).HUDService;
 let dump = Cu.import("resource://gre/modules/devtools/Console.jsm").console.log;
 

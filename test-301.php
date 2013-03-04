@@ -1,7 +1,5 @@
 <?php
 
-
-
 if (@$_GET['test'] == "cookies") {
   header("Very-Long-Header: " . str_repeat("foo baz", 1000));
   header("Set-Cookie: special=specialvalue=specialresult");
@@ -19,7 +17,13 @@ if (@$_GET['test'] == "cookies") {
 } else if (@$_GET['test'] == "fail") {
   header('HTTP/1.1 404 Not Found');
   echo "<p>lol, epic fail";
+} else if (@$_GET{'test'} == 'acl') {
+  header("Access-Control-Allow-Origin: www.example.com");
+  header("Access-Control-Allow-Origin: www.evil-example.com", false);
+  setcookie("cookie1", "omg \n \r \t \v \b \c lolz <p>kiss me");
+  setcookie("lastupdate", date("c"));
+  echo "<p>acl ftw!";
 } else {
-  echo "<p><a href='?test=header301'>test headers</a> <a href='?test=cookies'>test cookies</a>";
+  echo "<p><a href='?test=header301'>test headers</a> <a href='?test=cookies'>test cookies</a> <a href='?test=acl'>test multiple Access-Control-Allow-Origin</a>";
 }
 
