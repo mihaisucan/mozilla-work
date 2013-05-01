@@ -3,6 +3,6 @@
 ac_add_options --with-android-ndk="$CFG_ANDROID_NDK"
 ac_add_options --with-android-sdk="$CFG_ANDROID_SDK/platforms/android-16"
 ac_add_options --with-android-toolchain="$CFG_ANDROID_TOOLCHAIN"
-ac_add_options --with-android-version=5
+ac_add_options --with-android-version=9
 ac_add_options --target=arm-linux-androideabi
 ac_add_options --disable-crashreporter

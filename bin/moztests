@@ -189,7 +189,7 @@ case "$TEST_SUITE" in
     subtests_end
     ;;
   ( '-inspector' | '-highlighter' )
-    TEST_DIR="browser/devtools/highlighter/test"
+    TEST_DIR="browser/devtools/inspector/test"
     MAKE_TARGET="mochitest-browser-chrome"
     ;;
   ( '-si' | '-styleinspector' )
@@ -356,7 +356,7 @@ then
   TEST_FILE="$CUSTOM_TEST_FILE"
 fi
 
-# the folder cannot be overriden
+# the folder cannot be overridden
 if [[ -z "$TEST_DIR" ]]
 then
   if [[ ! -d "$MY_PWD/$CUSTOM_TEST_DIR" ]]
