@@ -15,6 +15,7 @@ _expected="..."
 profile_name="$MY_REPO_NAME"
 profile_temporary=n
 safe_mode=n
+jsconsole=n
 for i do
   case $i in
     ('-gdb')
@@ -26,6 +27,9 @@ for i do
       ;;
     ('-b2g')
       b2g=y
+      ;;
+    ('-jsconsole')
+      jsconsole=y
       ;;
     ('-profile' | '-p')
       _expected="profile"
@@ -133,6 +137,11 @@ cmd="$cmd -profile $profile_path -purgecaches"
 if [[ "$safe_mode" == "y" ]]
 then
   cmd="$cmd -safe-mode"
+fi
+
+if [[ "$jsconsole" == "y" ]]
+then
+  cmd="$cmd -jsconsole"
 fi
 
 if [[ "$b2g" == "y" ]]
