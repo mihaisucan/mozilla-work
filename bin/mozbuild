@@ -77,8 +77,8 @@ fi
 
 if [[ "$CFG_BUILD_CLANG" -eq 1 ]]
 then
-  export CC='clang-3.2 -Qunused-arguments -fcolor-diagnostics -w'
-  export CXX='clang++-3.2 -Qunused-arguments -fcolor-diagnostics -w'
+  export CC='clang -Qunused-arguments -fcolor-diagnostics -w'
+  export CXX='clang++ -Qunused-arguments -fcolor-diagnostics -w'
 fi
 
 cd "$MY_REPO_DIR"
