@@ -50,7 +50,7 @@ done
 
 if [[ ! -d "$CFG_BUILDS_DIR" ]]
 then
-  echo "folder not found: $CFG_BUILDS_DIR"
+  echo "CFG_BUILDS_DIR folder not found: $CFG_BUILDS_DIR"
   exit 1
 fi
 
@@ -70,7 +70,7 @@ fi
 
 if [[ ! -d "$ffdir" ]]
 then
-  echo "folder not found: $ffdir"
+  echo "Firefox folder not found: $ffdir"
   exit 1
 fi
 
@@ -110,7 +110,7 @@ fi
 
 if [[ ! -d "$CFG_PROFILE_DIR" ]]
 then
-  echo "Folder not found: $CFG_PROFILE_DIR"
+  echo "CFG_PROFILE_DIR folder not found: $CFG_PROFILE_DIR"
   exit 1
 fi
 
