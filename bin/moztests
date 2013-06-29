@@ -192,6 +192,10 @@ case "$TEST_SUITE" in
     TEST_DIR="browser/devtools/inspector/test"
     MAKE_TARGET="mochitest-browser-chrome"
     ;;
+  ( '-fontinspector' | '-fi' )
+    TEST_DIR="browser/devtools/fontinspector/test"
+    MAKE_TARGET="mochitest-browser-chrome"
+    ;;
   ( '-si' | '-styleinspector' )
     TEST_DIR="browser/devtools/styleinspector/test"
     MAKE_TARGET="mochitest-browser-chrome"
@@ -249,10 +253,22 @@ case "$TEST_SUITE" in
     TEST_DIR="browser/devtools/debugger/test"
     MAKE_TARGET="mochitest-browser-chrome"
     ;;
-  ( '-toolkit-debugger' )
-    TEST_DIR="toolkit/devtools/debugger/tests"
+  ( '-toolkit-debugger-xpcshell' )
+    TEST_DIR="toolkit/devtools/server/tests"
     XPCSHELL_SUBDIR="unit"
     MAKE_TARGET="xpcshell-tests"
+    ;;
+  ( '-toolkit-debugger-mochitest' )
+    TEST_DIR="toolkit/devtools/server/tests"
+    MAKE_TARGET="mochitest-chrome"
+    ;;
+  ( '-toolkit-debugger' )
+    # run the js debugger tests
+    run_self -toolkit-debugger-xpcshell
+    echo;
+    run_self -toolkit-debugger-mochitest
+
+    subtests_end
     ;;
   ( '-jsdbg' | '-debugger' )
     # run the js debugger tests
@@ -273,6 +289,10 @@ case "$TEST_SUITE" in
     ;;
   ( '-devtools-shared' )
     TEST_DIR="browser/devtools/shared/test"
+    MAKE_TARGET="mochitest-browser-chrome"
+    ;;
+  ( '-profiler' )
+    TEST_DIR="browser/devtools/profiler/test"
     MAKE_TARGET="mochitest-browser-chrome"
     ;;
   ( '-devtools-framework' )
