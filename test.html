@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html>
-  <head>
+  <head><![CDATA[ lolz ]]>
     <style type="text/css">
-      @import "test.css";
+      @import "test.css?testfoo=3#bazbaz";
 
       .foobar { color: pink; }
 
@@ -38,7 +38,7 @@
       }
       #menu:hover p { display: block }
     </style>
-    <link rel=stylesheet href="test-unmatched.css">
+    <link rel=stylesheet href="test-unmatched.css?foobaz=foobar#lolz">
   </head>
   <body>
     <div class="test">hello world!</div>
@@ -53,16 +53,56 @@
     <button id=generateError>generate error!</button>
     <button id=consoleAPI>console api</button>
     <button onclick="doMyXHR()">do XHR</button>
+    <button onclick="logEvents()">log events</button>
     <button onclick="console.clear()">clear</button>
     <button onclick="console.group('foo')">group</button>
     <button onclick="console.groupEnd('foo', window, document)">groupEnd</button>
 
-    <script type="text/javascript"><!--
+<script type="application/javascript">
+var myWorker = new Worker("worker.js");
+
+myWorker.onmessage = function(ev)
+{
+  console.log("Worker said: ", ev.data);
+};
+
+myWorker.postMessage("page init");
+
+function sendMessageToWorker()
+{
+  var msg = "msg from outer space " + Date.now();
+  console.log("sending message to worker:", msg);
+  myWorker.postMessage(msg);
+}
+</script>
+
+    <script type="text/javascript">
       //window.console = {};
       //window.console.error = function() { alert("lol") };
 
       function $(param) {
         console.log("$('" + param + "') was called");
+      }
+
+      var loggingEvents = false;
+      function logEvents() {
+        var events = ['mouseover', 'mouseout', 'focus', 'blur', 'click',
+            'dblclick', 'mousedown', 'mouseup', 'contextmenu', 'keydown',
+            'keypress', 'keyup'];
+        if (loggingEvents) {
+          events.forEach(function(ev) {
+            window.removeEventListener(ev, onGenericEvent);
+          });
+        } else {
+          events.forEach(function(ev) {
+            window.addEventListener(ev, onGenericEvent);
+          });
+        }
+        loggingEvents = !loggingEvents;
+        console.log('logging events', loggingEvents);
+      }
+      function onGenericEvent(ev) {
+        console.log('generic event', ev);
       }
 
       if (window.$) {
@@ -82,6 +122,7 @@
         bigDeal = "lolz";
 
         function foobarTraceMe1(a, b) {
+          console.count("foocount");
           return foobarTraceMe2(a+1, b+2);
         }
 
@@ -96,12 +137,26 @@
 
         var btnGenerateError = document.querySelector("#generateError");
         btnGenerateError.addEventListener("click", function(ev) {
+          try {
+            var foo1 = document.querySelector("div:foobar:zoo() !@#");
+          } catch (ex) {
+            window.lastDOMException = ex;
+          }
+          var foo2 = document.querySelector("div:foobar:zoo() !@#");
+        });
+        btnGenerateError.addEventListener("click", function(ev) {
           document.body.childNodes[1000];
           if (ev.preventBubble) {
             ev.preventBubble();
           }
           try {
-            foobarObject.intern();
+            function lolz() {
+              foobarObject.intern(window);
+            }
+            function lolz2() {
+              lolz();
+            }
+            lolz2();
           } catch (ex) {
             window.lastException = ex;
           }
@@ -110,11 +165,39 @@
 
         var btnConsoleAPI = document.querySelector("#consoleAPI");
         btnConsoleAPI.addEventListener("click", function(ev) {
+          var testDir = {
+            testProp: "testValue",
+            hello: 1,
+            world: true,
+          };
+          console.dir(testDir);
+          console.count("foocount");
+          console.log("tezt", testDir);
+
           myEventHandler(ev);
 
           console.time("foo");
           console.dir(document.styleSheets, console);
           foobarTraceMe1(1, 2);
+
+          // bug 865288
+          for (var i = 0; i < 3; i++) {
+            var o = { i: i };
+            console.log("test no repeat", o);
+          }
+
+          console.log("test repeat", 0);
+          console.log("test repeat", 0);
+          console.log("test repeat", 2); console.log("test repeat", 2);
+          console.log("test repeat", 0);
+
+          console.count("foocount");
+
+          console.assert("zuzu", "zuzu assert");
+          console.assert(true, "true assert", "foo");
+          console.assert(false, "false assert %s", document, window, "foo");
+          console.assert("", "falsy assert");
+
           var result = console.timeEnd("foo");
           console.log("timeEnd result " + result);
 
@@ -156,6 +239,9 @@
           console.error("error omg %s %o %d %i %f %a", "aloha", document.body, 
               window.innerWidth, window.innerHeight, Math.PI, "zuzu", null, 
               undefined);
+          if (console.exception) {
+            console.exception("exception", window.lastException);
+          }
           console.debug("debug", ev.type, ev);
         };
 
@@ -234,10 +320,66 @@
       };
       req.send(null);
       })();
+    </script>
 
-      window.foobarObject = {a: 1, b: 2, c: 3};
+    <script>
+(function() {
+      window.foobarObject = {a: 1, b: 2, c: 3,
+        lolz: function(a, b) {
+          console.log('DO NOT COMPUTE');
+          alert('omg!');
+          return 'eh';
+        },
+        lolz2: function named2(a, b) { },
+        lolz3: function() { },
+        lolz4: function(a, b, c) { },
+        lolz5: function named5() { },
+        lrrr: ["a", 42, "b", true, document, Date.now(), new Date(),],
+        zoidberg: ["a", false, null, undefined, /f*o+obar?/],
+        fry: [function zuzu() { return 'lolz'; }, "", window, new Date(), /NDND/gimy],
+        whoopwhoop: [],
+        eyePhone: new Set([1,2,'a',document, window.getSelection()]),
+        bender: new Map(),
+      };
+      foobarObject.lolz4.displayName = "withDisplayName4";
+      foobarObject.lolz5.displayName = "overwriteNameWithDisplayName5";
+      foobarObject.zoidberg[0] = foobarObject;
+      foobarObject.lrrr[2] = foobarObject.fry;
+      for (var i = 0; i < 500; i++) {
+        foobarObject.whoopwhoop[i] = "omg" + i;
+      }
+      foobarObject.bender.set("abba", "niyaz");
+      foobarObject.bender.set("azizam", "asiri");
+      foobarObject.bender.set(document.body, document.head);
+      Object.defineProperty(foobarObject, "nonEnumerable", {
+        value: "ishtenem",
+        enumerable: false,
+      });
+})();
+    </script>
 
-    // --></script>
+    <script>
+(function() {
+ window.foobarObject = window.foobarObject || {};
+      foobarObject.frag = document.createDocumentFragment();
+      var span = document.createElement("span");
+      span.className = 'foo';
+      span.dataset.lolz = 'hehe';
+      var div = document.createElement('div')
+      div.id = 'fragdiv';
+      var anchor = document.createElement('a');
+      anchor.href = '#';
+      div.appendChild(anchor);
+      foobarObject.frag.appendChild(span);
+      foobarObject.frag.appendChild(div);
+
+      for (var i = 0; i < 15; i++) {
+        var elem = document.createElement("div");
+        elem.className = 'elem' + i;
+        foobarObject.frag.appendChild(elem);
+      }
+})();
+    </script>
 
 <script type="application/javascript;version=1.8">
 (function(){
@@ -431,7 +573,8 @@ function perfObjectConsoleAPI() {
   var start = new Date().getTime();
   for (var i = 0; i < perf_loops; i++) {
     var obj = {time: new Date().getTime(), index: i};
-    console.dir(obj);
+    console.log(obj);
+    //console.dir(obj);
   }
   var end = new Date().getTime();
   var elem = document.getElementById("consoleperf-results");
@@ -470,7 +613,7 @@ function perfScriptErrors() {
     <button onclick="myEventHandler(event, true)">debug!</button>
     <button onclick="perfSimpleConsoleAPI()">perf test: simple console API</button>
     <button onclick="perfObjectConsoleAPI()">perf test: console API with object</button></p>
-    <button onclick="perfScriptErrors()">perf test: script errors</button></p>
+    <p><button onclick="sendMessageToWorker()">worker console test</button></p>
     <p id="consoleperf-results"></p>
     <div id="menu">menu<p>submenu</p></div>
     <div style="border: 1px red solid" id="bigarea">big area</div>
@@ -481,6 +624,13 @@ function perfScriptErrors() {
       editable</div>
     </div>
     <textarea>foo</textarea>
-    <p><button onclick="myDoPaste()">paste!</button></p>
+    <p><button onclick="myDoPaste()">paste!</button> <input type="password" name="lolz"></p>
+    <div id="crossdomainiframe">
+      <iframe src="http://127.0.0.1/~mihai/mozilla/test.html"></iframe>
+    </div>
+    <p><a href="https://ie.microsoft.com/testdrive/browser/mixedcontent/assets/woodgrove.htm">mixed content warning test</a></p>
+    <form method="get" action="?">
+      <p><input type="password" name="lol"></p>
+    </form>
   </body>
 </html>
