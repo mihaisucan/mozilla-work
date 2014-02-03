@@ -59,6 +59,11 @@
     <button onclick="console.groupEnd('foo', window, document)">groupEnd</button>
 
 <script type="application/javascript">
+(function() {
+ if (window.parent !== window) {
+   return;
+ }
+
 var myWorker = new Worker("worker.js");
 
 myWorker.onmessage = function(ev)
@@ -68,12 +73,18 @@ myWorker.onmessage = function(ev)
 
 myWorker.postMessage("page init");
 
-function sendMessageToWorker()
+window.sendMessageToWorker = function()
 {
+  myWorker.postMessage("time");
   var msg = "msg from outer space " + Date.now();
   console.log("sending message to worker:", msg);
   myWorker.postMessage(msg);
-}
+  setTimeout(function() {
+    myWorker.postMessage("timeEnd");
+  }, 1000);
+};
+
+})();
 </script>
 
     <script type="text/javascript">
@@ -124,6 +135,10 @@ function sendMessageToWorker()
         function foobarTraceMe1(a, b) {
           console.count("foocount");
           return foobarTraceMe2(a+1, b+2);
+        }
+
+        function foobarTraceMe1b(a, b) {
+          return foobarTraceMe2(a+3, b+4);
         }
 
         function foobarTraceMe2(a, b) {
@@ -179,6 +194,7 @@ function sendMessageToWorker()
           console.time("foo");
           console.dir(document.styleSheets, console);
           foobarTraceMe1(1, 2);
+          foobarTraceMe1b(3, 4); foobarTraceMe1b(5, 6);
 
           // bug 865288
           for (var i = 0; i < 3; i++) {
@@ -197,6 +213,8 @@ function sendMessageToWorker()
           console.assert(true, "true assert", "foo");
           console.assert(false, "false assert %s", document, window, "foo");
           console.assert("", "falsy assert");
+          console.log("foo %c zuzu %c bla bla", "color:red", "color: blue");
+          console.log("%cfoo %c zuzu %c bla bla", "color:pink", "color:red", "color: blue");
 
           var result = console.timeEnd("foo");
           console.log("timeEnd result " + result);
