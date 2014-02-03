@@ -12,7 +12,7 @@ source "$MY_DIR/_mozinclude"
 
 gdb=0
 dbg=0
-xvfb=0
+xvfb=1
 nofail=0
 REPEAT_RUNS=1
 argslist=""
@@ -32,6 +32,10 @@ for i do
       ;;
     ('-xvfb')
       xvfb=1
+      argslist="$i $argslist"
+      ;;
+    ('-noxvfb' | '-nox')
+      xvfb=0
       argslist="$i $argslist"
       ;;
     ('-nofail')
@@ -79,18 +83,12 @@ MY_SELF_ARGS="$MY_SELF $argslist"
 
 cd "$MY_REPO_DIR"
 
-app="browser"
+prepare_moz_env $dbg
 
-if [[ $dbg -eq 1 ]]
+unset MOZ_QUIET
+if [[ ! -d "$MOZ_OBJDIR" ]]
 then
-  OBJ_DIR="$CFG_BUILDS_DIR/$MY_REPO_NAME/$app-dbg"
-else
-  OBJ_DIR="$CFG_BUILDS_DIR/$MY_REPO_NAME/$app-opt"
-fi
-
-if [[ ! -d "$OBJ_DIR" ]]
-then
-  echo "folder not found: $OBJ_DIR"
+  echo "folder not found: $MOZ_OBJDIR"
   exit 1
 fi
 
@@ -118,39 +116,56 @@ function run_test {
 
   echo;
 
-  if [[ "$MAKE_TARGET" == "xpcshell-tests" ]]
+  local machcmd="$(maketarget2machcommand "$MAKE_TARGET")"
+  local currentcmd="$RUN_TEST_CMD $machcmd --shuffle"
+  if [[ "$REPEAT_RUNS" > 1 ]]
   then
-    if [[ -f "$MY_REPO_DIR/$_test" ]]
-    then
-      local src="$MY_REPO_DIR/$TEST_DIR/$XPCSHELL_SUBDIR"
-      local src="$(win2unix_path "$src")"
-      local dest="$MY_REPO_DIR/$_test"
-      local dest="$(win2unix_path "$dest")"
-      export SOLO_FILE="$(relative_path "$src" "$dest")"
-      echo "SOLO_FILE=$SOLO_FILE"
-      local currentcmd="$RUN_TEST_CMD -C $TEST_DIR check-one"
-    else
-      local currentcmd="$RUN_TEST_CMD -C $TEST_DIR $MAKE_TARGET"
-    fi
-  else
-    export TEST_PATH="$_test"
-    echo "TEST_PATH=$TEST_PATH"
-    local currentcmd="$RUN_TEST_CMD -C $OBJ_DIR $MAKE_TARGET"
+    currentcmd="$currentcmd --repeat $REPEAT_RUNS"
   fi
+  local currentcmd="$currentcmd $_test"
 
-  for ((n=0; n<REPEAT_RUNS; n++))
-  do
-    if [[ "$n" > 0 && "$xvfb" == 1 ]]
-    then
-      sleep 1s
-    fi
+  #for ((n=0; n<REPEAT_RUNS; n++))
+  #do
+  #  if [[ "$n" > 0 && "$xvfb" == 1 ]]
+  #  then
+  #    sleep 1s
+  #  fi
 
     echo;
-    echo "Run #${n}:"
+    #echo "Run #${n}:"
     echo "$currentcmd"
     echo;
+
+    if [[ "$xvfb" == 1 ]]
+    then
+      # get the terminal window id
+      local terminal_win=$(xdotool getactivewindow | head -1)
+      Xephyr -ac -br -reset -terminate -screen 1200x830 -dpi 160 :1 &
+
+      # get the xephyr window id and wait for it
+      local xephyr_win=$(xdotool search --sync --onlyvisible --class Xephyr | head -1)
+
+      # focus the terminal
+      xdotool windowactivate --sync $terminal_win
+
+      # move the xephyr window to screen 2
+      xdotool windowmove --sync $xephyr_win 2000 0
+
+      # start a window manager for firefox
+      export DISPLAY=:1
+      metacity &
+    fi
+
     $currentcmd
     local cmd_result=$?
+
+    if [[ "$xvfb" == 1 ]]
+    then
+      killall metacity
+      sleep 1s
+      export DISPLAY=:0
+    fi
+
     if [[ $nofail -ne 1 && $cmd_result -ne 0 ]]
     then
       echo;
@@ -158,7 +173,7 @@ function run_test {
       echo "Timer: $SECONDS seconds."
       exit 1
     fi
-  done
+  #done
 }
 
 # default make target
@@ -173,13 +188,25 @@ case "$TEST_SUITE" in
 
     subtests_end
     ;;
-  ( '-browser-webconsole' | '-browser-console' )
+  ( '-browser-webconsole' | '-browser-console' | '-browserconsole' )
     TEST_DIR="browser/devtools/webconsole/test"
     MAKE_TARGET="mochitest-browser-chrome"
     ;;
   ( '-toolkit-webconsole' | '-toolkit-console' )
+    # run the all of the web console tests
+    run_self -toolkit-console-chrome
+    echo;
+    run_self -toolkit-console-xpcshell
+    subtests_end
+    ;;
+  ( '-toolkit-console-chrome' )
     TEST_DIR="toolkit/devtools/webconsole/test"
     MAKE_TARGET="mochitest-chrome"
+    ;;
+  ( '-toolkit-console-xpcshell' )
+    TEST_DIR="toolkit/devtools/webconsole/test"
+    XPCSHELL_SUBDIR="unit"
+    MAKE_TARGET="xpcshell-tests"
     ;;
   ( '-consoleapi' )
     run_self -dom-browser
@@ -422,10 +449,6 @@ then
 fi
 
 RUN_TEST_CMD="$MY_MAKE"
-if [[ $xvfb -eq 1 ]]
-then
-  RUN_TEST_CMD="xvfb-run $RUN_TEST_CMD"
-fi
 
 if [[ -d "$TEST_DIR" && ! -z "$FILE_FILTER" ]]
 then
@@ -441,12 +464,7 @@ then
 
   FILES=($FILE_FILTER)
 
-  if [[ "$MAKE_TARGET" == "xpcshell-tests" ]]
-  then
-    cd "$OBJ_DIR"
-  else
-    cd "$MY_REPO_DIR"
-  fi
+  cd "$MY_REPO_DIR"
 
   echo;
   echo "Files matched: ${FILES[@]}"
@@ -475,10 +493,6 @@ then
   exit 0
 
 else
-  if [[ "$MAKE_TARGET" == "xpcshell-tests" ]]
-  then
-    cd "$OBJ_DIR"
-  fi
   run_test "$TEST_DIR"
 
   echo;

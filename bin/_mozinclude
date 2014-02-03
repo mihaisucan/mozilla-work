@@ -39,15 +39,9 @@ SMARTMAKE_CONFIG="$MY_REPO_DIR/$MY_REPO_TYPE/.smartmake"
 SMARTMAKE_TIMESTAMP="$MY_REPO_DIR/$MY_REPO_TYPE/.smartmake-timestamp"
 MY_NOTIFYSEND="notify-send"
 MY_ADB="$CFG_ANDROID_SDK/platform-tools/adb"
+MY_MAKE="$MY_REPO_DIR/mach"
 
-if [[ "$MY_OS" == "mswin" ]]
-then
-  MY_MAKE="python $MY_REPO_DIR/build/pymake/make.py"
-else
-  MY_MAKE="make"
-fi
-
-SMARTMAKE_CMD="$MY_MAKE -s -j 12 -C"
+SMARTMAKE_CMD="$MY_REPO_DIR/mach build -j 12"
 
 source "$MY_DIR/../config.local"
 
@@ -86,3 +80,66 @@ function unix2win_path {
   echo "${1/\/c\//c:/}"
 }
 
+function maketarget2machcommand {
+  case $1 in
+    "mochitest-browser-chrome")
+      echo "mochitest-browser"
+      ;;
+    "xpcshell-tests")
+      echo "xpcshell-test"
+      ;;
+    *)
+      echo "$1"
+      ;;
+  esac
+}
+
+function prepare_moz_env {
+  declare dbg=$1
+  declare b2g=$2
+  declare fennec=$3
+  export MOZ_OBJDIR="$CFG_BUILDS_DIR/$MY_REPO_NAME"
+
+  if [[ ! -d "$MOZ_OBJDIR" ]]
+  then
+    mkdir "$MOZ_OBJDIR"
+  fi
+
+  if [[ $dbg -eq 1 ]]
+  then
+    buildtype="dbg"
+  else
+    buildtype="opt"
+  fi
+
+  if [[ $b2g -eq 1 ]]
+  then
+    export MY_MOZ_APP="b2g"
+  elif [[ $fennec -eq 1 ]]
+  then
+    export MY_MOZ_APP="mobile/android"
+  else
+    export MY_MOZ_APP="browser"
+  fi
+
+  mozapp="${MY_MOZ_APP/\//-}"
+  export MOZ_OBJDIR="${CFG_BUILDS_DIR}/${MY_REPO_NAME}/${mozapp}-${buildtype}"
+
+  if [[ "$MY_OS" == "mswin" ]]
+  then
+    export MOZ_OBJDIR="$(unix2win_path "$MOZ_OBJDIR")"
+  fi
+  export MY_MOZ_OBJDIR="$MOZ_OBJDIR"
+
+  export MY_MOZCONFIG_COMMON="$MY_DIR/../mozconfig/common"
+
+  if [[ $fennec -eq 1 ]]
+  then
+    export MOZCONFIG="$MY_DIR/../mozconfig/fennec"
+    export MY_MOZCONFIG_INCLUDE="$MY_DIR/../mozconfig/$buildtype"
+  else
+    export MOZCONFIG="$MY_DIR/../mozconfig/$buildtype"
+  fi
+
+  export MOZBUILD_STATE_PATH="$HOME/.mozbuild"
+}

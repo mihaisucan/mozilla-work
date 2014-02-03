@@ -11,7 +11,7 @@ clobber=0
 configure=0
 both=0
 argslist=""
-use_smartmake=0
+use_smartmake=1
 b2g=0
 fennec=0
 do_install=0
@@ -32,6 +32,10 @@ for i do
       ;;
     ('-smart' | '-inc')
       use_smartmake=1
+      argslist="$i $argslist"
+      ;;
+    ('-nosmart' | '-noinc' | '-full' | '-f')
+      use_smartmake=0
       argslist="$i $argslist"
       ;;
     ('-both')
@@ -80,6 +84,7 @@ then
   export CC='clang -Qunused-arguments -fcolor-diagnostics -w'
   export CXX='clang++ -Qunused-arguments -fcolor-diagnostics -w'
 fi
+export MOZ_PSEUDO_DERECURSE=1
 
 cd "$MY_REPO_DIR"
 
@@ -95,42 +100,7 @@ then
   exit 0
 fi
 
-export MOZ_OBJDIR="$CFG_BUILDS_DIR/$MY_REPO_NAME"
-
-if [[ ! -d "$MOZ_OBJDIR" ]]
-then
-  mkdir "$MOZ_OBJDIR"
-fi
-
-if [[ $dbg -eq 1 ]]
-then
-  buildtype="dbg"
-else
-  buildtype="opt"
-fi
-
-if [[ $b2g -eq 1 ]]
-then
-  export MY_MOZ_APP="b2g"
-elif [[ $fennec -eq 1 ]]
-then
-  export MY_MOZ_APP="mobile/android"
-else
-  export MY_MOZ_APP="browser"
-fi
-
-mozapp="${MY_MOZ_APP/\//-}"
-export MOZ_OBJDIR="${CFG_BUILDS_DIR}/${MY_REPO_NAME}/${mozapp}-${buildtype}"
-
-export MY_MOZCONFIG_COMMON="$MY_DIR/../mozconfig/common"
-
-if [[ $fennec -eq 1 ]]
-then
-  export MOZCONFIG="$MY_DIR/../mozconfig/fennec"
-  export MY_MOZCONFIG_INCLUDE="$MY_DIR/../mozconfig/$buildtype"
-else
-  export MOZCONFIG="$MY_DIR/../mozconfig/$buildtype"
-fi
+prepare_moz_env $dbg $b2g $fennec
 
 if [[ ! -f "$MOZCONFIG" ]]
 then
@@ -160,21 +130,15 @@ function the_end {
   exit $1
 }
 
-if [[ "$MY_OS" == "mswin" ]]
-then
-  export MOZ_OBJDIR="$(unix2win_path "$MOZ_OBJDIR")"
-fi
-
 if [[ $configure -eq 1 ]]
 then
-  $MY_MAKE -f client.mk configure
+  $MY_MAKE configure
   the_end $? "configure"
 fi
 
-
 if [[ $fennec -eq 1 && $do_package -eq 1 ]]
 then
-  $MY_MAKE -C "$MOZ_OBJDIR" package
+  $MY_MAKE package
   the_end $? "package"
 fi
 
@@ -202,7 +166,7 @@ then
   make_result=$?
   cp "$SMARTMAKE_TIMESTAMP" "$buildtimestamp"
 else
-  $MY_MAKE -f client.mk build
+  $MY_MAKE build
   make_result=$?
   if [[ "$make_result" -eq 0 && -f "$SMARTMAKE_TIMESTAMP" ]]
   then

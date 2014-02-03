@@ -1,9 +1,10 @@
 . $topsrcdir/browser/config/mozconfig
 
-#mk_add_options MOZ_OBJDIR=@TOPSRCDIR@/ff-dbg-obj
+mk_add_options MOZ_OBJDIR="$MY_MOZ_OBJDIR"
 mk_add_options MOZ_MAKE_FLAGS="-j12 -s"
 mk_add_options AUTOCLOBBER=1
 ac_add_options --enable-tests
 ac_add_options --with-ccache
+ac_add_options --disable-crashreporter
 #ac_add_options --disable-libjpeg-turbo
 ac_add_options --enable-application=${MY_MOZ_APP}
