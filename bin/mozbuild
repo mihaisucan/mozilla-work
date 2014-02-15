@@ -11,11 +11,12 @@ clobber=0
 configure=0
 both=0
 argslist=""
-use_smartmake=1
+use_smartmake=0
 b2g=0
 fennec=0
 do_install=0
 do_package=0
+mach_args=""
 
 for i do
   case $i in
@@ -56,6 +57,9 @@ for i do
     ('-package')
       do_package=1
       argslist="$i $argslist"
+      ;;
+    ( * )
+      mach_args="$mach_args $i"
       ;;
   esac
 done
@@ -166,7 +170,7 @@ then
   make_result=$?
   cp "$SMARTMAKE_TIMESTAMP" "$buildtimestamp"
 else
-  $MY_MAKE build
+  $MY_MAKE build $mach_args
   make_result=$?
   if [[ "$make_result" -eq 0 && -f "$SMARTMAKE_TIMESTAMP" ]]
   then
