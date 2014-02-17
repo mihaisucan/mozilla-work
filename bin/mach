@@ -1,0 +1,7 @@
+#!/bin/bash
+
+MY_DIR="$( cd -P "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source "$MY_DIR/_mozinclude"
+
+prepare_moz_env
+${MY_REPO_DIR}/mach $@
