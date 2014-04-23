@@ -91,9 +91,9 @@ window.sendMessageToWorker = function()
       //window.console = {};
       //window.console.error = function() { alert("lol") };
 
-      function $(param) {
-        console.log("$('" + param + "') was called");
-      }
+      //function $(param) {
+      //  console.log("$('" + param + "') was called");
+      //}
 
       var loggingEvents = false;
       function logEvents() {
@@ -146,7 +146,9 @@ window.sendMessageToWorker = function()
         }
 
         function foobarTraceMe3(a, b) {
+          console.assert(false, "test stacktrace in console.assert", window);
           console.trace();
+          console.error("test stacktrace in console.error", document.body);
           return a+1 + b+2;
         }
 
@@ -180,6 +182,17 @@ window.sendMessageToWorker = function()
 
         var btnConsoleAPI = document.querySelector("#consoleAPI");
         btnConsoleAPI.addEventListener("click", function(ev) {
+          //foobarTraceMe1(1, 2);
+          console.time("foo");
+
+          console.log("foo %c zuzu %c bla bla", "color:red;background:cyan", "color: blue");
+          console.log("%cfoo %c zuzu %c bla bla", "color:pink", "color:red;font-size:1.3em", "color: blue");
+          console.log("%cbackground image", "color:green;font-weight:bold;background:blue url('data:image/gif;base64,R0lGODlhAQABAPAAAP8AAP///yH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==')");
+          console.log("foo%cbar%cboom", 'color:blue', 'color:green');
+          console.log("foo%szoom%cbar %d lolz%cboom%oomg%cred", ' test ', 'color:blue', Date.now(), 'color:green;font-weight:bold', window, 'color:red;font-size:2em');
+          console.log("%cbad boy", 'font:1.4em arial; padding:6px; position:absolute; top:0; left:0; background:cyan; width:10em; height: 0; overflow: hidden; text-decoration:underline; display: inline-block');
+          console.info("foobar%cbazbaz", 'color:green', window, "%comg", 'color:blue');
+
           var testDir = {
             testProp: "testValue",
             hello: 1,
@@ -191,7 +204,6 @@ window.sendMessageToWorker = function()
 
           myEventHandler(ev);
 
-          console.time("foo");
           console.dir(document.styleSheets, console);
           foobarTraceMe1(1, 2);
           foobarTraceMe1b(3, 4); foobarTraceMe1b(5, 6);
@@ -213,8 +225,7 @@ window.sendMessageToWorker = function()
           console.assert(true, "true assert", "foo");
           console.assert(false, "false assert %s", document, window, "foo");
           console.assert("", "falsy assert");
-          console.log("foo %c zuzu %c bla bla", "color:red", "color: blue");
-          console.log("%cfoo %c zuzu %c bla bla", "color:pink", "color:red", "color: blue");
+
 
           var result = console.timeEnd("foo");
           console.log("timeEnd result " + result);
@@ -358,6 +369,7 @@ window.sendMessageToWorker = function()
         whoopwhoop: [],
         eyePhone: new Set([1,2,'a',document, window.getSelection()]),
         bender: new Map(),
+        sparse: new Array(10),
       };
       foobarObject.lolz4.displayName = "withDisplayName4";
       foobarObject.lolz5.displayName = "overwriteNameWithDisplayName5";
@@ -369,10 +381,12 @@ window.sendMessageToWorker = function()
       foobarObject.bender.set("abba", "niyaz");
       foobarObject.bender.set("azizam", "asiri");
       foobarObject.bender.set(document.body, document.head);
-      Object.defineProperty(foobarObject, "nonEnumerable", {
+      Object.defineProperty(foobarObject, "nonEnumerable!!", {
         value: "ishtenem",
         enumerable: false,
       });
+      foobarObject.sparse[0] = 'zuzu';
+      foobarObject.sparse[8] = 'console-fun';
 })();
     </script>
 
